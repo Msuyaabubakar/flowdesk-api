@@ -1,44 +1,43 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 
-/**
- * Fake authentication middleware
- * (Temporary until JWT is added)
- */
-export const requireAuth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // Simulated logged-in user
-  req.user = {
-    id: 1,
-    role: "admin"
-  };
+export interface JWTPayload {
+  userId:   string;
+  tenantId: string;
+  role:     string;
+  email:    string;
+}
 
-  next();
+declare global {
+  namespace Express {
+    interface Request {
+      user: JWTPayload;
+    }
+  }
+}
+
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing token' });
+  }
+  try {
+    const payload = jwt.verify(
+      header.slice(7),
+      process.env.JWT_SECRET || 'devsecret'
+    ) as JWTPayload;
+    req.user = payload;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
+  }
 };
 
-/**
- * Role-based authorization middleware
- */
-export const requireRole = (role: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+export const requireRole = (min: string) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const rank: Record<string, number> = { admin: 3, supervisor: 2, field_agent: 1 };
+    if (!req.user || (rank[req.user.role] || 0) < (rank[min] || 0)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
     }
-
-    if (user.role !== role) {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden"
-      });
-    }
-
     next();
   };
-};
