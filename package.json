@@ -1,33 +1,39 @@
 {
   "name": "flowdesk-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": { "dev": "ts-node-dev --respawn --transpile-only src/server.ts", "build": "tsc", "start": "node dist/server.js" },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "description": "FlowDesk API Server",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "ts-node --transpile-only src/server.ts",
+    "build": "echo 'no build needed'"
+  },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1033.0",
-    "@aws-sdk/s3-request-presigner": "^3.1033.0",
-    "@sendgrid/mail": "^8.1.6",
-    "africastalking": "^0.8.0",
-    "bcrypt": "^6.0.0",
-    "bullmq": "^5.75.2",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.3.2",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "pg": "^8.20.0",
-    "redis": "^5.12.1",
-    "zod": "^4.3.6"
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@sendgrid/mail": "^8.0.0",
+    "africastalking": "^0.6.0",
+    "bcrypt": "^5.0.0",
+    "bullmq": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.0.0",
+    "redis": "^4.0.0",
+    "zod": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
+    "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.0",
+    "@types/express": "^4.17.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.0.0",
+    "ts-node": "^10.9.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.0"
   }
 }
