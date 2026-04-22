@@ -4,7 +4,7 @@
   "description": "FlowDesk API Server",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "npx tsc",
+    "build": "tsc",
     "start": "node dist/server.js"
   },
   "dependencies": {
@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.0",
     "pg": "^8.0.0",
     "redis": "^4.0.0",
-    "zod": "^3.0.0"
+    "zod": "^3.0.0",
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -32,7 +33,6 @@
     "@types/node": "^20.0.0",
     "@types/pg": "^8.0.0",
     "ts-node": "^10.9.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0"
+    "ts-node-dev": "^2.0.0"
   }
 }
