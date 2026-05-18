@@ -15,6 +15,15 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', version: '1.0.0', ts: new Date().toISOString() });
 });
 
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await db.query('SELECT COUNT(*) as count FROM users');
+    res.json({ connected: true, userCount: result.rows[0].count });
+  } catch(e) {
+    res.json({ connected: false, error: e.message });
+  }
+});
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
@@ -72,7 +81,8 @@ app.post('/api/auth/login', async (req, res) => {
       user: { id: dbUser.id, email: dbUser.email, fullName: dbUser.full_name, role: dbUser.role, tenantId: dbUser.tenant_id }
     });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error('Login error:', e);
+    res.status(500).json({ error: e.message, stack: e.stack });
   }
 });
 
