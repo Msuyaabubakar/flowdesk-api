@@ -1,0 +1,2181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5c57">
+<meta name="description" content="FlowDesk GRM: grievance redress and field data collection for resettlement and land acquisition projects. Works offline.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FlowDesk">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>FlowDesk GRM</title>
+<style>
+:root{
+  --bg:#f3f5f4;--surface:#fff;--surface-2:#f8faf9;--ink:#13201f;--ink-2:#46534f;--ink-3:#7a8784;
+  --line:#e1e7e5;--line-2:#cbd5d2;
+  --brand:#0f5c57;--brand-dark:#0a403c;--brand-soft:#e2f0ee;--brand-ink:#fff;
+  --ok:#1d7a4b;--ok-soft:#e1f3e9;--warn:#9a5800;--warn-soft:#fcefd6;--bad:#b42318;--bad-soft:#fde7e5;
+  --info:#24529f;--info-soft:#e5edfa;--vio:#6a3e9e;--vio-soft:#efe8f8;--mute:#5b6866;--mute-soft:#eceff0;
+  --radius:10px;--radius-sm:7px;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07);
+  --shadow-lg:0 12px 32px rgba(16,24,40,.18);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand)}
+h1{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:700}
+h3{font-size:.92rem;font-weight:700}
+.hidden{display:none!important}
+.muted{color:var(--ink-3)}
+.small{font-size:.8rem}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85em}
+.row{display:flex;align-items:center;gap:.5rem}
+.row.wrap{flex-wrap:wrap}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.stack>*+*{margin-top:.75rem}
+.grow{flex:1}
+.nowrap{white-space:nowrap}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:40px;padding:.5rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--line-2);background:var(--surface);font-weight:600;font-size:.88rem;cursor:pointer;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn-primary:hover{background:var(--brand-dark)}
+.btn-danger{color:var(--bad);border-color:#f0b8b2}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-sm{min-height:32px;padding:.3rem .65rem;font-size:.8rem}
+.btn-lg{min-height:52px;font-size:1rem;width:100%}
+.btn svg{width:18px;height:18px;flex:none}
+.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Forms */
+.field{display:block;margin-bottom:.85rem}
+.field>span,.lbl{display:block;font-size:.8rem;font-weight:600;color:var(--ink-2);margin-bottom:.3rem}
+.req::after{content:" *";color:var(--bad)}
+.inp,select.inp,textarea.inp{width:100%;min-height:44px;padding:.55rem .7rem;border:1px solid var(--line-2);border-radius:var(--radius-sm);background:var(--surface);font-size:16px}
+textarea.inp{min-height:96px;resize:vertical}
+.inp:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:var(--brand)}
+.inp.invalid{border-color:var(--bad);background:var(--bad-soft)}
+.check{display:flex;align-items:flex-start;gap:.6rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;margin-bottom:.5rem}
+.check input{width:20px;height:20px;margin-top:1px;accent-color:var(--brand);flex:none}
+.check b{display:block;font-size:.88rem}
+.check small{color:var(--ink-3);font-size:.78rem}
+.check.alert{border-color:#f0b8b2;background:var(--bad-soft)}
+.opts{display:flex;flex-wrap:wrap;gap:.4rem}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt span{display:inline-block;padding:.5rem .8rem;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);font-size:.85rem;cursor:pointer;user-select:none}
+.opt input:checked+span{background:var(--brand);border-color:var(--brand);color:#fff}
+.opt input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 .75rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 .75rem}
+@media (max-width:560px){.grid2,.grid3{grid-template-columns:1fr}}
+fieldset{border:0;margin:0 0 1rem}
+legend{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.6rem}
+.err-text{color:var(--bad);font-size:.8rem;margin-top:.25rem}
+
+/* Cards, badges */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem}
+.card+.card{margin-top:.85rem}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.75rem}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.12rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap;background:var(--mute-soft);color:var(--mute)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.85}
+.badge.plain::before{display:none}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-vio{background:var(--vio-soft);color:var(--vio)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-mute{background:var(--mute-soft);color:var(--mute)}
+.b-brand{background:var(--brand-soft);color:var(--brand)}
+.empty{padding:2rem 1rem;text-align:center;color:var(--ink-3);font-size:.9rem}
+
+/* Auth */
+.auth{min-height:100%;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:linear-gradient(160deg,#0a403c 0%,#0f5c57 55%,#2b7a63 100%)}
+.auth-box{width:100%;max-width:380px;background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);padding:1.75rem}
+.brand{display:flex;align-items:center;gap:.6rem}
+.brand-mark{width:36px;height:36px;border-radius:9px;background:var(--brand);display:grid;place-items:center;color:#fff;flex:none}
+.brand-mark svg{width:22px;height:22px}
+.brand b{font-size:1.05rem;letter-spacing:-.01em}
+.brand small{display:block;font-size:.72rem;color:var(--ink-3);font-weight:500}
+.auth-box .brand{margin-bottom:1.25rem}
+.auth-note{font-size:.78rem;color:var(--ink-3);margin-top:1rem;text-align:center}
+.alert-box{padding:.65rem .8rem;border-radius:var(--radius-sm);font-size:.84rem;margin-bottom:.85rem;background:var(--bad-soft);color:var(--bad)}
+.alert-box.info{background:var(--info-soft);color:var(--info)}
+.alert-box.warn{background:var(--warn-soft);color:var(--warn)}
+
+/* App chrome */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;background:var(--surface);border-bottom:1px solid var(--line);min-height:56px}
+.topbar .proj{min-width:0;flex:1}
+.topbar select.inp{min-height:36px;padding:.3rem .5rem;font-size:.88rem;max-width:260px}
+.proj-name{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-sub{font-size:.72rem;color:var(--ink-3)}
+.sync-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .7rem;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.sync-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.sync-pill.off .dot{background:var(--ink-3)}
+.sync-pill.pend .dot{background:#d98a00}
+.sync-pill.fail .dot{background:var(--bad)}
+.sync-pill.busy .dot{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.offline-bar{background:#2e3a38;color:#fff;font-size:.78rem;text-align:center;padding:.3rem .5rem}
+
+/* Field agent layout */
+.agent-main{max-width:640px;margin:0 auto;padding:1rem .9rem calc(84px + var(--safe-b))}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.5rem 0 .55rem;font-size:.7rem;font-weight:600;color:var(--ink-3);text-decoration:none}
+.bottom-nav a.on{color:var(--brand)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:.25rem 0 1rem}
+.action{display:flex;flex-direction:column;gap:.5rem;padding:1rem;border-radius:var(--radius);background:var(--brand);color:#fff;text-decoration:none;min-height:116px;box-shadow:var(--shadow)}
+.action.alt{background:#1e4f7a}
+.action b{font-size:1rem}
+.action small{opacity:.8;font-size:.78rem}
+.action .icon{width:26px;height:26px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-mini{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.55rem .6rem}
+.stat-mini b{display:block;font-size:1.15rem}
+.stat-mini span{font-size:.7rem;color:var(--ink-3);font-weight:600}
+.rec{display:flex;align-items:center;gap:.75rem;padding:.75rem .1rem;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;cursor:pointer}
+.rec:last-child{border-bottom:0}
+.rec-main{flex:1;min-width:0}
+.rec-title{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-sub{font-size:.76rem;color:var(--ink-3)}
+.rec-err{font-size:.74rem;color:var(--bad)}
+.tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line);margin-bottom:.85rem;overflow-x:auto}
+.tabs button{border:0;background:none;padding:.55rem .8rem;font-weight:600;font-size:.86rem;color:var(--ink-3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+.form-actions{position:sticky;bottom:calc(64px + var(--safe-b));display:flex;gap:.6rem;padding:.75rem 0;background:linear-gradient(transparent,var(--bg) 30%)}
+.form-actions .btn{flex:1;min-height:48px}
+.gps-box{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border:1px dashed var(--line-2);border-radius:var(--radius-sm);background:var(--surface-2);font-size:.84rem}
+.photos{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.photo{position:relative;width:76px;height:76px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--line)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo button{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:22px;cursor:pointer}
+
+/* HQ layout */
+.hq{display:grid;grid-template-columns:220px 1fr;min-height:100%}
+.side{background:#0c2e2c;color:#cfe2df;padding:1rem .65rem;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:.15rem}
+.side .brand{color:#fff;padding:0 .4rem .9rem}
+.side .brand small{color:#8fb2ad}
+.side .brand-mark{background:#1a8077}
+.side a{display:flex;align-items:center;gap:.6rem;padding:.55rem .65rem;border-radius:var(--radius-sm);color:#cfe2df;text-decoration:none;font-size:.88rem;font-weight:600}
+.side a:hover{background:rgba(255,255,255,.06)}
+.side a.on{background:#17504c;color:#fff}
+.side .who{margin-top:auto;padding:.75rem .5rem 0;border-top:1px solid rgba(255,255,255,.1);font-size:.8rem}
+.side .who b{display:block;color:#fff}
+.side .who button{margin-top:.5rem;background:transparent;border:1px solid rgba(255,255,255,.25);color:#cfe2df;border-radius:6px;padding:.3rem .6rem;font-size:.76rem;cursor:pointer}
+.hq-body{min-width:0;display:flex;flex-direction:column}
+.hq-main{padding:1.25rem;max-width:1280px;width:100%}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.page-h p{color:var(--ink-3);font-size:.85rem}
+.mob-nav{display:none}
+@media (max-width:900px){
+  .hq{grid-template-columns:1fr}
+  .side{display:none}
+  .mob-nav{display:flex;gap:.25rem;overflow-x:auto;background:#0c2e2c;padding:.4rem .5rem}
+  .mob-nav a{color:#cfe2df;text-decoration:none;font-size:.8rem;font-weight:600;padding:.4rem .7rem;border-radius:6px;white-space:nowrap}
+  .mob-nav a.on{background:#17504c;color:#fff}
+  .hq-main{padding:1rem .8rem}
+}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:.75rem;margin-bottom:1rem}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:.85rem .9rem;box-shadow:var(--shadow);text-decoration:none;color:inherit}
+.kpi span{display:block;font-size:.74rem;font-weight:600;color:var(--ink-3)}
+.kpi b{display:block;font-size:1.65rem;line-height:1.15;margin-top:.2rem;font-variant-numeric:tabular-nums}
+.kpi small{font-size:.74rem;color:var(--ink-3)}
+.kpi.alert b{color:var(--bad)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.cols-detail{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:.85rem;align-items:start}
+@media (max-width:900px){.cols2,.cols-detail{grid-template-columns:1fr}}
+.cols2>.card+.card,.cols-detail .card+.card{margin-top:0}
+.cols-detail>div>.card+.card{margin-top:.85rem}
+.bars{display:flex;flex-direction:column;gap:.5rem}
+.bar-row{display:grid;grid-template-columns:minmax(110px,38%) 1fr 36px;align-items:center;gap:.6rem;font-size:.82rem}
+.bar-row .track{height:10px;background:var(--mute-soft);border-radius:5px;overflow:hidden}
+.bar-row .fill{height:100%;background:var(--brand);border-radius:5px}
+.bar-row b{text-align:right;font-variant-numeric:tabular-nums}
+
+/* Table */
+.filters{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:.5rem;margin-bottom:.5rem}
+.filters2{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:.5rem;align-items:center;margin-bottom:.85rem}
+.filters .inp,.filters2 .inp{min-height:38px;font-size:.86rem}
+@media (max-width:900px){.filters,.filters2{grid-template-columns:1fr 1fr}.filters .search{grid-column:1/-1}}
+.table-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+table.t{width:100%;border-collapse:collapse;font-size:.84rem}
+.t th{text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-3);padding:.6rem .7rem;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+.t th[data-sort]{cursor:pointer;user-select:none}
+.t th[data-sort]:hover{color:var(--ink)}
+.t th .arr{opacity:.6}
+.t td{padding:.6rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+.t tbody tr{cursor:pointer}
+.t tbody tr:hover{background:var(--surface-2)}
+.t tbody tr:last-child td{border-bottom:0}
+.t .ref{font-weight:700;white-space:nowrap}
+.restricted{display:inline-flex;align-items:center;gap:.3rem;color:var(--vio);font-weight:600;font-size:.8rem}
+
+/* Case detail */
+.dl{display:grid;grid-template-columns:150px 1fr;gap:.45rem .8rem;font-size:.86rem}
+.dl dt{color:var(--ink-3);font-weight:600}
+.dl dd{min-width:0;overflow-wrap:anywhere}
+@media (max-width:560px){.dl{grid-template-columns:1fr}.dl dt{margin-top:.3rem}}
+.stepper{display:flex;gap:0;margin:.25rem 0 .9rem;overflow-x:auto}
+.step{flex:1;min-width:92px;text-align:center;font-size:.72rem;font-weight:600;color:var(--ink-3);position:relative;padding-top:20px}
+.step::before{content:"";position:absolute;top:6px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--surface);border:2px solid var(--line-2);z-index:1}
+.step::after{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:var(--line-2)}
+.step:first-child::after{display:none}
+.step.done{color:var(--ink-2)}
+.step.done::before{background:var(--brand);border-color:var(--brand)}
+.step.done::after,.step.cur::after{background:var(--brand)}
+.step.cur{color:var(--brand)}
+.step.cur::before{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.step.branch::before{border-color:var(--bad);background:var(--bad)}
+.step.branch{color:var(--bad)}
+.tl{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media (max-width:560px){.tl{grid-template-columns:1fr}}
+.tl-item{border:1px solid var(--line);border-radius:var(--radius-sm);padding:.6rem .7rem;background:var(--surface-2)}
+.tl-item span{display:block;font-size:.72rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.tl-item b{display:block;font-size:.92rem;margin:.15rem 0}
+.tl-item.met{border-color:#b7e0c9;background:var(--ok-soft)}
+.tl-item.late,.tl-item.overdue{border-color:#f0b8b2;background:var(--bad-soft)}
+.tl-item.soon{border-color:#f2d39a;background:var(--warn-soft)}
+.log{list-style:none}
+.log li{padding:.6rem 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.log li:last-child{border-bottom:0}
+.log .meta{font-size:.74rem;color:var(--ink-3);margin-bottom:.15rem}
+.lock{display:flex;gap:.75rem;align-items:flex-start;padding:1rem;border-radius:var(--radius);background:var(--vio-soft);color:#3f2563;border:1px solid #d9c9ee}
+.lock .icon{width:26px;height:26px;color:var(--vio)}
+
+/* Feed */
+.feed-item{display:flex;gap:.75rem;padding:.8rem 1rem;border-bottom:1px solid var(--line);cursor:pointer}
+.feed-item:last-child{border-bottom:0}
+.feed-item.new{background:#f2faf8}
+.feed-avatar{width:36px;height:36px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:.8rem;flex:none}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.4rem .8rem;margin-top:.6rem;font-size:.8rem}
+.kv div span{display:block;color:var(--ink-3);font-size:.72rem;font-weight:600}
+
+/* Modal + toast */
+.modal-bg{position:fixed;inset:0;z-index:50;background:rgba(10,20,19,.45);display:flex;align-items:flex-end;justify-content:center;padding:0}
+@media (min-width:640px){.modal-bg{align-items:center;padding:1rem}}
+.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--surface);border-radius:14px 14px 0 0;box-shadow:var(--shadow-lg);padding:1.25rem 1.25rem calc(1.25rem + var(--safe-b))}
+@media (min-width:640px){.modal{border-radius:14px}}
+.modal h2{margin-bottom:.85rem}
+.modal .actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}
+#toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%) translateY(10px);z-index:60;background:#13201f;color:#fff;padding:.6rem 1rem;border-radius:8px;font-size:.85rem;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.splash{min-height:100%;display:grid;place-items:center;color:var(--ink-3);font-size:.9rem}
+
+/* Reports + print */
+.report{background:#fff;color:#111;border:1px solid var(--line);border-radius:var(--radius);padding:1.5rem;margin-top:1rem}
+.report h1{font-size:1.3rem;margin-bottom:.2rem}
+.report h2{font-size:1rem;margin:1.25rem 0 .5rem;padding-bottom:.3rem;border-bottom:2px solid var(--brand);color:var(--brand-dark)}
+.report .rmeta{font-size:.8rem;color:#555;margin-bottom:.75rem}
+.report table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:.5rem;page-break-inside:auto}
+.report th,.report td{border:1px solid #d5dbd9;padding:.35rem .5rem;text-align:left}
+.report th{background:#eef3f2;font-weight:700}
+.report td.n,.report th.n{text-align:right;font-variant-numeric:tabular-nums}
+.report td:first-child{white-space:nowrap}
+.report .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.5rem 0}
+.report .summary div{border:1px solid #d5dbd9;border-radius:6px;padding:.5rem}
+.report .summary span{display:block;font-size:.72rem;color:#555}
+.report .summary b{font-size:1.2rem}
+.report .note{font-size:.76rem;color:#555;margin-top:1rem}
+.report-split{page-break-before:always}
+@media (max-width:560px){.report .summary{grid-template-columns:1fr 1fr}.report{padding:1rem}}
+@media print{
+  @page{margin:14mm}
+  body{background:#fff}
+  body *{visibility:hidden}
+  .print-area,.print-area *{visibility:visible}
+  .print-area{position:absolute;left:0;top:0;width:100%}
+  .print-area .report{border:0;padding:0;margin:0}
+  .no-print{display:none!important}
+  #toast{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app"><div class="splash">Loading FlowDesk…</div></div>
+<div id="modal-root"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* =====================================================================
+   CONFIGURATION  (edit here, nothing below needs to change per deploy)
+   ===================================================================== */
+
+/** Backend REST API base URL. All endpoints are relative to this. */
+const API_BASE = 'https://flowdesk-api-production-2cff.up.railway.app/api';
+
+const APP_VERSION = '2.0.0';
+
+/** GRM service standards. Projects may override ackDays / resolveDays. */
+const GRM_CONFIG = {
+  ackDays: 7,              // acknowledge within N days of receipt
+  resolveDays: 30,         // resolve within N days of receipt (default target date)
+  dueSoonDays: 3,          // highlight targets falling due within N days
+  autoSyncSeconds: 60,     // background sync interval while queue is non-empty
+  feedPollSeconds: 30,     // HQ field-data feed refresh interval
+  maxPhotos: 4,            // photo attachments per record
+  photoMaxPx: 1280,        // longest edge after on-device compression
+  photoQuality: 0.72
+};
+
+const GRM_CHANNELS = [
+  ['in_person', 'In person'], ['phone', 'Phone'], ['suggestion_box', 'Suggestion box'],
+  ['email', 'Email'], ['other', 'Other']
+];
+const GRM_CATEGORIES = [
+  ['land_compensation', 'Land / compensation'], ['employment', 'Employment'],
+  ['environmental', 'Environmental'], ['community_safety', 'Community safety'],
+  ['staff_conduct', 'Conduct of staff or contractors'],
+  ['information_request', 'Information request'], ['other', 'Other']
+];
+const SEVERITIES = [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']];
+
+/**
+ * Household survey definition. Add, remove or reorder fields here.
+ * type: text | tel | number | select | multi | yesno | textarea
+ * tally: true  -> counted per option in the field-data summary report
+ * sum:   true  -> summed in the field-data summary report
+ * title: true  -> used as the record's display name in lists and the feed
+ */
+const SURVEY_FORM = {
+  id: 'household-v1',
+  title: 'Household survey',
+  fields: [
+    { key: 'hh_head_name', label: 'Household head name', type: 'text', required: true, title: true },
+    { key: 'hh_head_sex', label: 'Sex of household head', type: 'select', options: ['Female', 'Male'], required: true, tally: true },
+    { key: 'hh_head_phone', label: 'Phone number', type: 'tel' },
+    { key: 'village', label: 'Village / mtaa', type: 'text', required: true, tally: true },
+    { key: 'hh_size', label: 'Household members (total)', type: 'number', min: 1, max: 60, required: true, sum: true },
+    { key: 'members_under18', label: 'Members under 18', type: 'number', min: 0, max: 60, sum: true },
+    { key: 'members_over60', label: 'Members over 60', type: 'number', min: 0, max: 60, sum: true },
+    { key: 'land_affected', label: 'Land affected', type: 'select', options: ['None', 'Partial', 'Full'], required: true, tally: true },
+    { key: 'land_area_ha', label: 'Affected land area (ha)', type: 'number', min: 0, step: '0.01', sum: true },
+    { key: 'tenure', label: 'Land tenure', type: 'select', options: ['Customary', 'Granted right of occupancy', 'Informal / tenant', 'Other'], tally: true },
+    { key: 'assets_affected', label: 'Assets affected', type: 'multi', options: ['Residential structure', 'Business structure', 'Crops', 'Trees', 'Graves', 'Water source', 'None'], tally: true },
+    { key: 'assets_notes', label: 'Asset details', type: 'textarea' },
+    { key: 'livelihood_primary', label: 'Primary livelihood source', type: 'select', options: ['Farming', 'Livestock', 'Fishing', 'Small business', 'Wage labour', 'Formal employment', 'Remittances', 'Other'], required: true, tally: true },
+    { key: 'vulnerability', label: 'Vulnerability flags', type: 'multi', options: ['Female-headed', 'Elderly-headed', 'Child-headed', 'Person with disability', 'Chronic illness', 'Extremely poor', 'None'], tally: true },
+    { key: 'consent_contact', label: 'Consents to be contacted', type: 'yesno', required: true, tally: true },
+    { key: 'remarks', label: 'Enumerator remarks', type: 'textarea' }
+  ]
+};
+
+/* =====================================================================
+   CONSTANTS + STATE
+   ===================================================================== */
+const STATUSES = [
+  ['received', 'Received'], ['acknowledged', 'Acknowledged'],
+  ['under_investigation', 'Under investigation'], ['resolved', 'Resolved'],
+  ['appealed', 'Appealed'], ['closed', 'Closed']
+];
+/** Allowed lifecycle transitions. Anything not listed is rejected. */
+const TRANSITIONS = {
+  received: ['acknowledged'],
+  acknowledged: ['under_investigation'],
+  under_investigation: ['resolved'],
+  resolved: ['closed', 'appealed'],
+  appealed: ['under_investigation'],
+  closed: []
+};
+const OPEN_STATUSES = ['received', 'acknowledged', 'under_investigation', 'appealed'];
+const STATUS_TONE = { received: 'b-info', acknowledged: 'b-vio', under_investigation: 'b-warn', resolved: 'b-ok', appealed: 'b-bad', closed: 'b-mute' };
+const SYNC_LABEL = { draft: 'Draft', queued: 'Queued', synced: 'Synced', failed: 'Failed' };
+const SYNC_TONE = { draft: 'b-mute', queued: 'b-warn', synced: 'b-ok', failed: 'b-bad' };
+const AGENT_ROLES = ['field_agent', 'agent', 'field', 'enumerator', 'field_officer'];
+const DB_NAME = 'flowdesk-grm';
+const DB_VERSION = 1;
+
+const state = {
+  session: null,          // { token, user: {id,name,email,role,projects,canViewSensitive}, role: 'agent'|'supervisor' }
+  projects: [],
+  projectId: '',          // '' = all projects (supervisor only)
+  grievances: [],
+  submissions: [],
+  invites: [],
+  online: navigator.onLine,
+  syncing: false,
+  lastSync: null,
+  feedSeenAt: null,
+  ui: {}                  // transient per-view state (filters, tabs, sort)
+};
+const VIEWS = {};          // route name -> { render(params), mount?(params), static? }
+const ACTIONS = {};        // data-act="name"    -> click handler (el, event)
+const FORMS = {};          // data-form="name"   -> submit handler (form, submitter)
+const CHANGES = {};        // data-change="name" -> change handler (el, event)
+const timers = { sync: null, feed: null, toast: null };
+let db = null;
+
+/* =====================================================================
+   UTILITIES
+   ===================================================================== */
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ESC_MAP[c]); }
+function uid() {
+  if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function todayStr() { return ymd(new Date()); }
+function parseYmd(s) { const p = String(s || '').slice(0, 10).split('-').map(Number); return new Date(p[0] || 1970, (p[1] || 1) - 1, p[2] || 1); }
+function addDays(s, n) { const d = parseYmd(s); d.setDate(d.getDate() + Number(n || 0)); return ymd(d); }
+function diffDays(a, b) { return Math.round((parseYmd(b) - parseYmd(a)) / 86400000); }
+function fmtDate(s) { if (!s) return '-'; return parseYmd(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function fmtDateTime(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  if (isNaN(d)) return '-';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+function timeAgo(iso) {
+  if (!iso) return '';
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + ' min ago';
+  if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+  return Math.floor(s / 86400) + ' d ago';
+}
+function lbl(list, key) { const f = list.find(x => x[0] === key); return f ? f[1] : (key || '-'); }
+function optionsHtml(list, selected, placeholder) {
+  let out = placeholder !== undefined ? '<option value="">' + esc(placeholder) + '</option>' : '';
+  for (const [v, t] of list) out += '<option value="' + esc(v) + '"' + (String(selected) === String(v) ? ' selected' : '') + '>' + esc(t) + '</option>';
+  return out;
+}
+function initials(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?'; }
+function countBy(list, fn) { const m = {}; for (const x of list) { const k = fn(x); if (k == null || k === '') continue; m[k] = (m[k] || 0) + 1; } return m; }
+function pickList(data, keys) {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') for (const k of keys) if (Array.isArray(data[k])) return data[k];
+  return [];
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(timers.toast);
+  timers.toast = setTimeout(() => el.classList.remove('show'), 2800);
+}
+const ICONS = {
+  logo: '<path d="M4 5h16v10H9l-5 4z"/><path d="M8.5 10l2 2 4-4"/>',
+  home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+  alert: '<path d="M4 5h16v10H9l-5 4z"/><path d="M12 8v3M12 13.5v.01"/>',
+  clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+  list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  inbox: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
+  folder: '<path d="M3 7h6l2 2h10v10H3z"/>',
+  report: '<path d="M6 3h9l4 4v14H6z"/><path d="M9 13v4M12 10v7M15 15v2"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 11a3 3 0 0 0 0-6M21 20c0-2-1.5-4-4-4.7"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  refresh: '<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/>',
+  back: '<path d="M15 6l-6 6 6 6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>'
+};
+function icon(name, cls) { return '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[name] || '') + '</svg>'; }
+
+/* =====================================================================
+   INDEXEDDB (local-first store)
+   ===================================================================== */
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains('meta')) d.createObjectStore('meta');
+      if (!d.objectStoreNames.contains('grievances')) d.createObjectStore('grievances', { keyPath: 'lid' });
+      if (!d.objectStoreNames.contains('submissions')) d.createObjectStore('submissions', { keyPath: 'lid' });
+      if (!d.objectStoreNames.contains('projects')) d.createObjectStore('projects', { keyPath: 'id' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function idb(store, mode, fn) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, mode);
+    const req = fn(tx.objectStore(store));
+    let result;
+    if (req) req.onsuccess = () => { result = req.result; };
+    tx.oncomplete = () => resolve(result);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+function dbGetAll(store) { return idb(store, 'readonly', os => os.getAll()); }
+function dbGet(store, key) { return idb(store, 'readonly', os => os.get(key)); }
+function dbPut(store, value, key) { return idb(store, 'readwrite', os => (key === undefined ? os.put(value) : os.put(value, key))); }
+function dbDel(store, key) { return idb(store, 'readwrite', os => os.delete(key)); }
+function dbClear(store) { return idb(store, 'readwrite', os => os.clear()); }
+
+/* =====================================================================
+   API CLIENT
+   Contract (JSON over HTTPS, `Authorization: Bearer <token>` on every call):
+     POST  /auth/login          {email,password} -> {token, user:{id,name,role,projects[],permissions[]}}
+     GET   /projects            -> [project]        POST /projects {name,code,ackDays,resolveDays,description}
+     GET   /grievances          ?createdBy=<userId> (field agents) -> [grievance] or {items:[...]}
+     POST  /grievances          grievance + clientId (idempotency key) + provisionalRef -> grievance with id, ref
+     GET   /grievances/:id      PATCH /grievances/:id  full record + updatedAt (server applies last-write-wins)
+     GET   /submissions         ?agentId=<userId>   POST /submissions  submission + clientId -> submission with id
+     POST  /invites             {email, role: field_agent|supervisor, projectIds[]}
+   The server should redact sensitive cases (grievant, description, location,
+   notes, photos, plus `redacted:true`) for users who are not the assigned
+   handler and lack the `sensitive` permission.
+   ===================================================================== */
+async function api(method, path, body) {
+  if (!navigator.onLine) { const e = new Error('Offline'); e.network = true; throw e; }
+  const headers = { Accept: 'application/json' };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (state.session && state.session.token) headers.Authorization = 'Bearer ' + state.session.token;
+  let res;
+  try {
+    res = await fetch(API_BASE + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+  } catch (_) {
+    const e = new Error('Network unavailable'); e.network = true; throw e;
+  }
+  const text = await res.text();
+  let data = null;
+  if (text) { try { data = JSON.parse(text); } catch (_) { data = { message: text.slice(0, 200) }; } }
+  if (!res.ok) {
+    const e = new Error((data && (data.error || data.message)) || ('Request failed (' + res.status + ')'));
+    e.status = res.status;
+    if (res.status === 401 && path !== '/auth/login') handleExpiredSession();
+    throw e;
+  }
+  return data;
+}
+
+/* =====================================================================
+   SESSION + AUTH
+   ===================================================================== */
+function mapRole(role) { return AGENT_ROLES.includes(String(role || '').toLowerCase()) ? 'agent' : 'supervisor'; }
+function normalizeUser(u) {
+  u = u || {};
+  const projects = u.projects || u.projectIds || u.projectAccess || u.project_access || [];
+  const perms = u.permissions || [];
+  return {
+    id: String(u.id != null ? u.id : (u.userId || '')),
+    name: u.name || u.fullName || u.full_name || u.email || 'User',
+    email: u.email || '',
+    role: u.role || '',
+    projects: (Array.isArray(projects) ? projects : []).map(p => String(typeof p === 'object' ? p.id : p)),
+    canViewSensitive: !!(u.canViewSensitive || u.confidentialHandler || (Array.isArray(perms) && (perms.includes('sensitive') || perms.includes('confidential'))))
+  };
+}
+function me() { return state.session ? state.session.user : null; }
+function isAgent() { return !!state.session && state.session.role === 'agent'; }
+
+async function login(email, password) {
+  const data = await api('POST', '/auth/login', { email, password });
+  const token = data && (data.token || data.accessToken || data.access_token);
+  if (!token) throw new Error('The server did not return a session token.');
+  const user = normalizeUser(data.user);
+  const owner = await dbGet('meta', 'owner');
+  if (owner && owner.id !== user.id) {
+    const pending = await countPendingStored();
+    if (pending > 0) throw new Error('This device holds ' + pending + ' unsynced record(s) from ' + owner.name + '. Sign in as ' + owner.name + ' to sync them first.');
+    await wipeLocalData();
+  }
+  state.session = { token, user, role: mapRole(user.role) };
+  await dbPut('meta', state.session, 'session');
+  await dbPut('meta', { id: user.id, name: user.name }, 'owner');
+  await loadLocal();
+  startApp();
+  syncNow(false);
+}
+async function countPendingStored() {
+  const [g, s] = await Promise.all([dbGetAll('grievances'), dbGetAll('submissions')]);
+  return g.concat(s).filter(r => r.sync !== 'synced').length;
+}
+async function wipeLocalData() {
+  await Promise.all(['grievances', 'submissions', 'projects'].map(dbClear));
+  for (const k of ['projectId', 'lastSync', 'invites', 'feedSeenAt']) await dbDel('meta', k);
+  state.grievances = []; state.submissions = []; state.projects = []; state.invites = [];
+}
+function pendingCount() { return state.grievances.concat(state.submissions).filter(r => r.sync === 'queued' || r.sync === 'failed').length; }
+async function logout(force) {
+  const unsynced = state.grievances.concat(state.submissions).filter(r => r.sync !== 'synced').length;
+  if (unsynced && !force) {
+    openModal('<h2>Unsynced records on this device</h2><p>' + unsynced + ' record(s) have not reached the server yet. They stay safely on this device and will sync the next time you sign in.</p>' +
+      '<div class="actions"><button class="btn" data-act="modal-close">Cancel</button><button class="btn" data-act="sync-now">Sync now</button><button class="btn btn-primary" data-act="logout-force">Sign out</button></div>');
+    return;
+  }
+  closeModal();
+  state.session = null;
+  await dbDel('meta', 'session');
+  stopTimers();
+  location.hash = '';
+  renderLogin();
+}
+let expiredShown = false;
+function handleExpiredSession() {
+  if (expiredShown || !state.session) return;
+  expiredShown = true;
+  openModal('<h2>Session expired</h2><p>Your sign-in has expired. Your records are kept on this device. Sign in again to continue syncing.</p><div class="actions"><button class="btn btn-primary" data-act="logout-force">Sign in again</button></div>');
+}
+
+function renderLogin(message) {
+  stopTimers();
+  document.getElementById('app').innerHTML =
+    '<div class="auth"><form class="auth-box" data-form="login" novalidate>' +
+    '<div class="brand"><div class="brand-mark">' + icon('logo') + '</div><div><b>FlowDesk GRM</b><small>Grievance redress and field data</small></div></div>' +
+    (message ? '<div class="alert-box">' + esc(message) + '</div>' : '') +
+    (!navigator.onLine ? '<div class="alert-box warn">You are offline. Sign in once with a connection; after that the app works offline.</div>' : '') +
+    '<label class="field"><span>Email</span><input class="inp" name="email" type="email" autocomplete="username" required></label>' +
+    '<label class="field"><span>Password</span><input class="inp" name="password" type="password" autocomplete="current-password" required></label>' +
+    '<div id="login-err"></div>' +
+    '<button class="btn btn-primary btn-lg" type="submit">Sign in</button>' +
+    '<p class="auth-note">Your role and project access come from your organisation account.</p>' +
+    '</form></div>';
+}
+
+/* =====================================================================
+   RECORD STORE + SYNC ENGINE
+   Per-record sync state: draft | queued | synced | failed.
+   Records are keyed locally by `lid` (client-generated). The API owns `id`;
+   `clientId` (= lid) is sent with every create so retries are idempotent.
+   Conflicts resolve last-write-wins on `updatedAt`. Nothing queued is ever
+   removed locally until the server has accepted it.
+   ===================================================================== */
+const LOCAL_ONLY_FIELDS = ['lid', 'sync', 'syncError', 'refProvisional', 'redacted'];
+function nowIso() { return new Date().toISOString(); }
+
+async function saveLocal(kind, rec, touch) {
+  if (touch !== false) rec.updatedAt = nowIso();
+  const list = state[kind];
+  const i = list.findIndex(r => r.lid === rec.lid);
+  if (i >= 0) list[i] = rec; else list.unshift(rec);
+  await dbPut(kind, rec);
+  return rec;
+}
+async function queueLocal(kind, rec) {
+  rec.sync = 'queued';
+  rec.syncError = '';
+  await saveLocal(kind, rec);
+  renderSyncPill();
+  syncSoon();
+  return rec;
+}
+async function deleteDraft(kind, lid) {
+  const rec = state[kind].find(r => r.lid === lid);
+  if (!rec || rec.sync !== 'draft') return;
+  state[kind] = state[kind].filter(r => r.lid !== lid);
+  await dbDel(kind, lid);
+}
+function syncSoon() { clearTimeout(timers.soon); timers.soon = setTimeout(() => syncNow(false), 400); }
+function syncTick() { if (navigator.onLine && pendingCount() > 0) syncNow(false); }
+
+function toApi(kind, rec) {
+  const out = {};
+  for (const k of Object.keys(rec)) if (!LOCAL_ONLY_FIELDS.includes(k) && k !== 'id') out[k] = rec[k];
+  out.clientId = rec.clientId || rec.lid;
+  if (kind === 'grievances' && rec.refProvisional) { out.provisionalRef = rec.ref; delete out.ref; }
+  if (rec.redacted) { delete out.grievant; delete out.description; delete out.location; delete out.photos; delete out.notes; }
+  return out;
+}
+function normalizeProject(p) {
+  return {
+    id: String(p.id), code: p.code || p.projectCode || '', name: p.name || 'Untitled project',
+    description: p.description || '',
+    ackDays: Number(p.ackDays || p.ack_days) || '', resolveDays: Number(p.resolveDays || p.resolve_days) || '',
+    updatedAt: p.updatedAt || p.updated_at || ''
+  };
+}
+function normalizeGrievance(s, lid) {
+  const g = Object.assign({ notes: [], history: [], photos: [], location: {}, grievant: null }, s);
+  g.id = String(s.id);
+  g.lid = lid || s.clientId || ('srv-' + s.id);
+  g.ref = s.ref || s.reference || s.caseRef || '';
+  g.refProvisional = false;
+  g.projectId = String(s.projectId != null ? s.projectId : (s.project_id || ''));
+  g.status = s.status || 'received';
+  g.receivedAt = String(s.receivedAt || s.dateReceived || s.createdAt || nowIso()).slice(0, 10);
+  g.updatedAt = s.updatedAt || s.updated_at || s.createdAt || nowIso();
+  g.location = s.location || {};
+  g.redacted = !!s.redacted;
+  g.sync = 'synced';
+  g.syncError = '';
+  return g;
+}
+function normalizeSubmission(s, lid) {
+  const n = Object.assign({ data: {}, photos: [], gps: null }, s);
+  n.id = String(s.id);
+  n.lid = lid || s.clientId || ('srv-' + s.id);
+  n.projectId = String(s.projectId != null ? s.projectId : (s.project_id || ''));
+  n.capturedAt = s.capturedAt || s.submittedAt || s.createdAt || nowIso();
+  n.updatedAt = s.updatedAt || s.receivedAt || n.capturedAt;
+  n.agent = s.agent || { id: String(s.agentId || s.submitted_by || ''), name: s.agentName || s.agent_name || 'Unknown agent' };
+  n.sync = 'synced';
+  n.syncError = '';
+  return n;
+}
+/** Field devices never keep sensitive grievant details once the server has them. */
+function applyAgentRedaction(kind, rec) {
+  if (kind !== 'grievances' || !isAgent() || !rec.sensitive || rec.sync !== 'synced') return rec;
+  rec.grievant = null; rec.description = ''; rec.location = { text: '' }; rec.photos = []; rec.notes = []; rec.redacted = true;
+  return rec;
+}
+
+/** Push one record. Returns true when the server copy was newer (conflict resolved in its favour). */
+async function pushRecord(kind, rec) {
+  const base = kind === 'grievances' ? '/grievances' : '/submissions';
+  const sentAt = rec.updatedAt;
+  let res = null;
+  if (rec.id && kind === 'grievances') res = await api('PATCH', base + '/' + encodeURIComponent(rec.id), toApi(kind, rec));
+  else if (!rec.id) res = await api('POST', base, toApi(kind, rec));
+  const current = state[kind].find(r => r.lid === rec.lid) || rec;
+  const srv = res && (res.item || res.data || res.grievance || res.submission || res);
+  if (!srv || srv.id == null) {
+    current.sync = 'synced'; current.syncError = '';
+    applyAgentRedaction(kind, current);
+    await dbPut(kind, current);
+    return false;
+  }
+  const n = kind === 'grievances' ? normalizeGrievance(srv, rec.lid) : normalizeSubmission(srv, rec.lid);
+  if (current.updatedAt !== sentAt) {
+    // Edited again while the request was in flight: adopt the server id/ref, stay queued.
+    current.id = n.id;
+    if (kind === 'grievances' && n.ref) { current.ref = n.ref; current.refProvisional = false; }
+    await dbPut(kind, current);
+    return false;
+  }
+  if ((!n.photos || !n.photos.length) && current.photos && current.photos.length && !n.redacted) n.photos = current.photos;
+  if (kind === 'grievances' && !n.ref) { n.ref = current.ref; n.refProvisional = !!current.refProvisional; }
+  applyAgentRedaction(kind, n);
+  await saveLocal(kind, n, false);
+  return (n.updatedAt || '') > (sentAt || '');
+}
+
+async function mergeServer(kind, items) {
+  const norm = kind === 'grievances' ? normalizeGrievance : normalizeSubmission;
+  for (const s of items) {
+    if (!s || s.id == null) continue;
+    const sid = String(s.id);
+    const local = state[kind].find(r => r.id != null && String(r.id) === sid) || (s.clientId ? state[kind].find(r => r.lid === s.clientId) : null);
+    if (local && local.sync !== 'synced') {
+      // A local change is waiting to be pushed; it is resolved by LWW at push time.
+      if (!local.id) { local.id = sid; await dbPut(kind, local); }
+      continue;
+    }
+    const n = norm(s, local ? local.lid : undefined);
+    if (local && (local.updatedAt || '') > (n.updatedAt || '')) continue;
+    if (local && (!n.photos || !n.photos.length) && local.photos && local.photos.length && !n.redacted) n.photos = local.photos;
+    applyAgentRedaction(kind, n);
+    await saveLocal(kind, n, false);
+  }
+}
+async function replaceProjects(list) {
+  const norm = list.filter(p => p && p.id != null).map(normalizeProject);
+  await dbClear('projects');
+  for (const p of norm) await dbPut('projects', p);
+  state.projects = norm;
+  ensureProjectSelection();
+}
+async function pullAll() {
+  const u = me();
+  await replaceProjects(pickList(await api('GET', '/projects'), ['items', 'data', 'projects']));
+  const gq = isAgent() ? '?createdBy=' + encodeURIComponent(u.id) : '';
+  const sq = isAgent() ? '?agentId=' + encodeURIComponent(u.id) : '';
+  const g = await api('GET', '/grievances' + gq);
+  await mergeServer('grievances', pickList(g, ['items', 'data', 'grievances', 'cases']));
+  const s = await api('GET', '/submissions' + sq);
+  await mergeServer('submissions', pickList(s, ['items', 'data', 'submissions']));
+}
+
+async function syncNow(manual) {
+  if (!state.session || state.syncing) return;
+  if (!navigator.onLine) {
+    state.online = false; renderSyncPill();
+    if (manual) toast('Offline. ' + pendingCount() + ' record(s) will sync when you reconnect.');
+    return;
+  }
+  state.online = true;
+  state.syncing = true;
+  renderSyncPill();
+  let pushed = 0, failed = 0, conflicts = 0, stopped = false, pullError = '';
+  try {
+    for (const kind of ['grievances', 'submissions']) {
+      const queue = state[kind].filter(r => r.sync === 'queued' || r.sync === 'failed')
+        .sort((a, b) => String(a.updatedAt).localeCompare(String(b.updatedAt)));
+      for (const rec of queue) {
+        try { if (await pushRecord(kind, rec)) conflicts++; pushed++; }
+        catch (e) {
+          if (e.network || e.status === 401) { stopped = true; break; }
+          rec.sync = 'failed'; rec.syncError = e.message; await dbPut(kind, rec); failed++;
+        }
+      }
+      if (stopped) break;
+    }
+    if (!stopped) {
+      try { await pullAll(); state.lastSync = nowIso(); await dbPut('meta', state.lastSync, 'lastSync'); }
+      catch (e) { pullError = e.network ? 'connection lost' : e.message; }
+    }
+  } finally {
+    state.syncing = false;
+  }
+  if (manual) {
+    if (stopped) toast('Connection dropped. Records stay queued.');
+    else if (failed) toast(failed + ' record(s) failed. Open Records to retry.');
+    else if (pullError) toast('Sent ' + pushed + ', but refresh failed: ' + pullError);
+    else toast(pushed ? 'Synced ' + pushed + ' record(s)' : 'Up to date');
+  }
+  if (conflicts) toast(conflicts + ' record(s) were newer on the server; the latest version was kept.');
+  refreshView(true);
+}
+async function retryRecord(kind, lid) {
+  const rec = state[kind].find(r => r.lid === lid);
+  if (!rec || rec.sync !== 'failed') return;
+  rec.sync = 'queued'; rec.syncError = '';
+  await dbPut(kind, rec);
+  syncNow(true);
+}
+
+/* =====================================================================
+   GRM DOMAIN RULES
+   ===================================================================== */
+function projectRules(pid) {
+  const p = projectById(pid);
+  return { ackDays: Number(p && p.ackDays) || GRM_CONFIG.ackDays, resolveDays: Number(p && p.resolveDays) || GRM_CONFIG.resolveDays };
+}
+function dueState(left) { return left < 0 ? 'overdue' : (left <= GRM_CONFIG.dueSoonDays ? 'soon' : 'pending'); }
+function dueText(left) { return left < 0 ? (-left) + ' d overdue' : (left === 0 ? 'Due today' : left + ' d left'); }
+function caseTimeline(c) {
+  const r = projectRules(c.projectId);
+  const t = todayStr();
+  const ackDue = addDays(c.receivedAt, r.ackDays);
+  const target = c.targetDate || addDays(c.receivedAt, r.resolveDays);
+  const open = OPEN_STATUSES.includes(c.status);
+  let ack;
+  if (c.acknowledgedAt) {
+    const late = diffDays(ackDue, c.acknowledgedAt);
+    ack = { state: late > 0 ? 'late' : 'met', text: late > 0 ? 'Acknowledged ' + late + ' d late' : 'Acknowledged on time' };
+  } else if (c.status === 'received') {
+    const left = diffDays(t, ackDue);
+    ack = { state: dueState(left), text: dueText(left) };
+  } else ack = { state: 'met', text: 'Acknowledged' };
+  let res;
+  if (c.resolutionDate && (c.status === 'resolved' || c.status === 'closed')) {
+    const late = diffDays(target, c.resolutionDate);
+    res = { state: late > 0 ? 'late' : 'met', text: late > 0 ? 'Resolved ' + late + ' d late' : 'Resolved on time' };
+  } else if (!open) res = { state: 'met', text: lbl(STATUSES, c.status) };
+  else { const left = diffDays(t, target); res = { state: dueState(left), text: dueText(left) }; }
+  return { ackDue, target, ack, res, open, overdue: open && t > target, ackOverdue: c.status === 'received' && t > ackDue, daysOpen: diffDays(c.receivedAt, c.closedAt || t) };
+}
+function canViewSensitive(c) {
+  if (!c.sensitive) return true;
+  if (c.redacted) return false;
+  const u = me();
+  if (u.canViewSensitive) return true;
+  if (c.handlerId && String(c.handlerId) === u.id) return true;
+  return isAgent() && c.createdBy && c.createdBy.id === u.id && c.sync !== 'synced';
+}
+/** Identity as shown in lists, feeds and the dashboard (never the detail view). */
+function identityCell(c) {
+  if (c.sensitive) return '<span class="restricted">' + icon('lock') + 'Restricted</span>';
+  if (c.anonymous) return '<span class="muted">Anonymous</span>';
+  if (c.confidential) return '<span class="muted">Confidential</span>';
+  return esc((c.grievant && c.grievant.name) || '-');
+}
+function nextProvisionalRef(projectId) {
+  const p = projectById(projectId);
+  const code = (p && p.code) || 'GRM';
+  let max = 0;
+  for (const g of state.grievances) {
+    if (String(g.projectId) !== String(projectId)) continue;
+    const m = String(g.ref || '').match(/(\d+)$/);
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return code + '-' + String(max + 1).padStart(4, '0');
+}
+function allowedTransitions(c) { return TRANSITIONS[c.status] || []; }
+function auditEntry(extra) { const u = me(); return Object.assign({ at: nowIso(), by: u.name, byId: u.id }, extra); }
+async function transitionCase(c, to, fields, note) {
+  if (!allowedTransitions(c).includes(to)) throw new Error('A case cannot move from ' + lbl(STATUSES, c.status) + ' to ' + lbl(STATUSES, to) + '.');
+  Object.assign(c, fields || {});
+  c.history = (c.history || []).concat([auditEntry({ from: c.status, to, note: note || '' })]);
+  c.status = to;
+  return queueLocal('grievances', c);
+}
+async function updateCase(c, fields, note) {
+  Object.assign(c, fields);
+  c.history = (c.history || []).concat([auditEntry({ note })]);
+  return queueLocal('grievances', c);
+}
+async function appendNote(c, text) {
+  c.notes = (c.notes || []).concat([auditEntry({ text })]);
+  return queueLocal('grievances', c);
+}
+function scoped(list) {
+  if (state.projectId) return list.filter(r => String(r.projectId) === String(state.projectId));
+  const allowed = me().projects;
+  return allowed.length ? list.filter(r => allowed.includes(String(r.projectId))) : list;
+}
+function knownPeople() {
+  const map = new Map();
+  const add = (id, name) => { if (id && name && !map.has(String(id))) map.set(String(id), name); };
+  const u = me();
+  add(u.id, u.name);
+  for (const g of state.grievances) { if (g.createdBy) add(g.createdBy.id, g.createdBy.name); add(g.handlerId, g.handlerName); }
+  for (const s of state.submissions) if (s.agent) add(s.agent.id, s.agent.name);
+  return Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/* =====================================================================
+   SHARED FORM PARTS: GPS + PHOTOS
+   ===================================================================== */
+function formCtx() { return state.ui.form || (state.ui.form = { gps: null, photos: [] }); }
+function gpsInner(g, busy) {
+  const body = busy ? '<span class="muted">Locating…</span>'
+    : g ? '<b class="mono">' + g.lat.toFixed(6) + ', ' + g.lng.toFixed(6) + '</b><div class="small muted">±' + Math.round(g.acc || 0) + ' m · ' + esc(fmtDateTime(g.at)) + '</div>'
+    : '<span class="muted">No GPS fix yet</span>';
+  return icon('pin') + '<div class="grow">' + body + '</div><button type="button" class="btn btn-sm" data-act="gps"' + (busy ? ' disabled' : '') + '>' + (g ? 'Refresh' : 'Capture GPS') + '</button>';
+}
+function gpsWidget() { return '<div class="gps-box" id="gps-box">' + gpsInner(formCtx().gps, false) + '</div>'; }
+function paintGps(busy) { const el = document.getElementById('gps-box'); if (el) el.innerHTML = gpsInner(formCtx().gps, busy); }
+function captureGps(auto) {
+  if (!('geolocation' in navigator)) { if (!auto) toast('This device has no GPS access.'); return; }
+  const ctx = formCtx();
+  paintGps(true);
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      if (formCtx() !== ctx) return;
+      ctx.gps = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy, at: new Date(pos.timestamp || Date.now()).toISOString() };
+      paintGps(false);
+    },
+    err => { if (formCtx() !== ctx) return; paintGps(false); if (!auto) toast('GPS unavailable: ' + (err.message || 'permission denied')); },
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 }
+  );
+}
+function photosWidget() {
+  return '<input type="file" id="photo-input" accept="image/*" capture="environment" multiple class="hidden" data-change="photos">' +
+    '<button type="button" class="btn" data-act="photo-pick">' + icon('camera') + 'Add photo</button> <span class="small muted">Up to ' + GRM_CONFIG.maxPhotos + ', compressed on the phone</span>' +
+    '<div class="photos" id="photos">' + photosInner() + '</div>';
+}
+function photosInner() {
+  return formCtx().photos.map((p, i) => '<div class="photo"><img src="' + esc(p.dataUrl) + '" alt="Attachment ' + (i + 1) + '"><button type="button" data-act="photo-del" data-i="' + i + '" aria-label="Remove photo">×</button></div>').join('');
+}
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const max = GRM_CONFIG.photoMaxPx;
+      const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ name: file.name || 'photo.jpg', type: 'image/jpeg', dataUrl: c.toDataURL('image/jpeg', GRM_CONFIG.photoQuality), takenAt: nowIso() });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image')); };
+    img.src = url;
+  });
+}
+ACTIONS.gps = () => captureGps(false);
+ACTIONS['photo-pick'] = () => { const i = document.getElementById('photo-input'); if (i) i.click(); };
+ACTIONS['photo-del'] = (el) => { formCtx().photos.splice(Number(el.dataset.i), 1); document.getElementById('photos').innerHTML = photosInner(); };
+CHANGES.photos = async (el) => {
+  const ctx = formCtx();
+  for (const f of Array.from(el.files || [])) {
+    if (ctx.photos.length >= GRM_CONFIG.maxPhotos) { toast('Photo limit reached'); break; }
+    try { ctx.photos.push(await compressImage(f)); } catch (e) { toast(e.message); }
+  }
+  el.value = '';
+  const box = document.getElementById('photos');
+  if (box) box.innerHTML = photosInner();
+};
+function markInvalid(form, names) {
+  form.querySelectorAll('.invalid').forEach(x => x.classList.remove('invalid'));
+  for (const n of names) {
+    const el = form.querySelector('[name="' + n + '"]');
+    const target = el && (el.type === 'radio' || el.type === 'checkbox') ? el.closest('.field') : el;
+    if (target) target.classList.add('invalid');
+  }
+  const first = form.querySelector('.invalid');
+  if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+function syncBadge(r) { return '<span class="badge ' + SYNC_TONE[r.sync] + '">' + SYNC_LABEL[r.sync] + '</span>'; }
+function statusBadge(s) { return '<span class="badge ' + (STATUS_TONE[s] || '') + '">' + esc(lbl(STATUSES, s)) + '</span>'; }
+
+/* =====================================================================
+   GRIEVANCE INTAKE FORM (field agent + HQ office intake)
+   ===================================================================== */
+function grievanceFormHtml(rec, backHref) {
+  const r = rec || {};
+  const g = r.grievant || {};
+  const loc = r.location || {};
+  const projects = accessibleProjects();
+  const pid = r.projectId || state.projectId || (projects[0] && projects[0].id) || '';
+  return '<form data-form="grievance" novalidate data-lid="' + esc(r.lid || '') + '" data-back="' + esc(backHref) + '">' +
+    '<div class="spread" style="margin-bottom:1rem"><div><h1>' + (rec ? 'Edit draft grievance' : 'New grievance') + '</h1><p class="small muted">' + (r.ref ? esc(r.ref) + ' · ' : '') + 'Saved on this device first</p></div><a class="btn btn-ghost btn-sm" href="' + esc(backHref) + '">Cancel</a></div>' +
+    '<div id="form-err"></div>' +
+    '<div class="card"><fieldset><legend>Receipt</legend>' +
+    '<div class="grid2"><label class="field"><span class="req">Date received</span><input class="inp" type="date" name="receivedAt" max="' + todayStr() + '" value="' + esc(r.receivedAt || todayStr()) + '"></label>' +
+    '<label class="field"><span class="req">Channel</span><select class="inp" name="channel">' + optionsHtml(GRM_CHANNELS, r.channel || 'in_person') + '</select></label></div>' +
+    '<label class="field"><span class="req">Project</span><select class="inp" name="projectId">' + optionsHtml(projects.map(p => [p.id, (p.code ? p.code + ' · ' : '') + p.name]), pid, projects.length ? undefined : 'No project available') + '</select></label>' +
+    '</fieldset></div>' +
+
+    '<div class="card"><fieldset><legend>Grievant</legend>' +
+    '<label class="check"><input type="checkbox" name="anonymous" data-change="toggle-anon"' + (r.anonymous ? ' checked' : '') + '><div><b>Anonymous</b><small>No name or contact recorded</small></div></label>' +
+    '<label class="check"><input type="checkbox" name="confidential"' + (r.confidential ? ' checked' : '') + '><div><b>Confidential</b><small>Identity hidden from lists, feeds and reports</small></div></label>' +
+    '<div id="grievant-fields"' + (r.anonymous ? ' class="hidden"' : '') + '>' +
+    '<label class="field"><span class="req">Full name</span><input class="inp" name="g_name" autocomplete="off" value="' + esc(g.name) + '"></label>' +
+    '<div class="grid2"><label class="field"><span>Phone</span><input class="inp" name="g_phone" type="tel" inputmode="tel" value="' + esc(g.phone) + '"></label>' +
+    '<label class="field"><span>Village / address</span><input class="inp" name="g_address" value="' + esc(g.address) + '"></label></div></div>' +
+    '</fieldset></div>' +
+
+    '<div class="card"><fieldset><legend>Sensitivity</legend>' +
+    '<label class="check' + (r.sensitive ? ' alert' : '') + '" id="sens-box"><input type="checkbox" name="sensitive" data-change="toggle-sens"' + (r.sensitive ? ' checked' : '') + '><div><b>Sensitive case</b><small>GBV / SEA, or a threat to a person. Routed to the confidential handler; identity and details are hidden from the general case table, feed, dashboard and reports.</small></div></label>' +
+    '</fieldset></div>' +
+
+    '<div class="card"><fieldset><legend>Grievance</legend>' +
+    '<div class="grid2"><label class="field"><span class="req">Category</span><select class="inp" name="category">' + optionsHtml(GRM_CATEGORIES, r.category, 'Select category') + '</select></label>' +
+    '<label class="field"><span>Sub-category</span><input class="inp" name="subCategory" placeholder="e.g. valuation of crops" value="' + esc(r.subCategory) + '"></label></div>' +
+    '<div class="field"><span class="lbl req">Severity</span><div class="opts">' + SEVERITIES.map(([v, t]) => '<label class="opt"><input type="radio" name="severity" value="' + v + '"' + (r.severity === v ? ' checked' : '') + '><span>' + t + '</span></label>').join('') + '</div></div>' +
+    '<label class="field"><span class="req">Description</span><textarea class="inp" name="description" placeholder="What happened, when, who is affected, what the grievant is asking for">' + esc(r.description) + '</textarea></label>' +
+    '</fieldset></div>' +
+
+    '<div class="card"><fieldset><legend>Location and evidence</legend>' +
+    '<label class="field"><span>Location</span><input class="inp" name="locText" placeholder="Village, ward, landmark" value="' + esc(loc.text) + '"></label>' +
+    gpsWidget() + '<div style="margin-top:.85rem">' + photosWidget() + '</div>' +
+    '</fieldset></div>' +
+
+    (rec ? '<p style="margin:.25rem 0 .5rem"><button type="button" class="btn btn-sm btn-danger" data-act="discard-draft" data-kind="grievances" data-lid="' + esc(rec.lid) + '">Discard draft</button></p>' : '') +
+    '<div class="form-actions"><button class="btn" type="submit" value="draft">Save draft</button><button class="btn btn-primary" type="submit" value="submit">Submit grievance</button></div>' +
+    '</form>';
+}
+function openGrievanceForm(rec) {
+  const loc = (rec && rec.location) || {};
+  state.ui.form = { gps: loc.lat != null ? { lat: loc.lat, lng: loc.lng, acc: loc.acc, at: loc.at } : null, photos: rec && rec.photos ? rec.photos.slice() : [] };
+}
+CHANGES['toggle-anon'] = (el) => { document.getElementById('grievant-fields').classList.toggle('hidden', el.checked); };
+CHANGES['toggle-sens'] = (el) => { document.getElementById('sens-box').classList.toggle('alert', el.checked); };
+
+FORMS.grievance = async (form, submitter) => {
+  const intent = submitter && submitter.value === 'draft' ? 'draft' : 'submit';
+  const f = form.elements;
+  const ctx = formCtx();
+  const u = me();
+  const existing = form.dataset.lid ? state.grievances.find(x => x.lid === form.dataset.lid) : null;
+  if (existing && existing.sync !== 'draft') { toast('This record is already submitted.'); return; }
+  const anonymous = f.anonymous.checked;
+  const severityEl = form.querySelector('input[name=severity]:checked');
+  const bad = [];
+  if (intent === 'submit') {
+    if (!f.receivedAt.value || f.receivedAt.value > todayStr()) bad.push('receivedAt');
+    if (!f.projectId.value) bad.push('projectId');
+    if (!f.category.value) bad.push('category');
+    if (!severityEl) bad.push('severity');
+    if (f.description.value.trim().length < 5) bad.push('description');
+    if (!anonymous && !f.g_name.value.trim()) bad.push('g_name');
+  } else if (!f.projectId.value) bad.push('projectId');
+  if (bad.length) {
+    markInvalid(form, bad);
+    document.getElementById('form-err').innerHTML = '<div class="alert-box">Complete the highlighted fields.</div>';
+    return;
+  }
+  const rec = existing || { lid: uid(), status: 'received', notes: [], history: [], photos: [], createdBy: { id: u.id, name: u.name }, createdAt: nowIso() };
+  const projectChanged = rec.projectId && String(rec.projectId) !== String(f.projectId.value);
+  rec.clientId = rec.lid;
+  rec.projectId = f.projectId.value;
+  rec.receivedAt = f.receivedAt.value || todayStr();
+  rec.channel = f.channel.value;
+  rec.anonymous = anonymous;
+  rec.confidential = f.confidential.checked;
+  rec.sensitive = f.sensitive.checked;
+  rec.grievant = anonymous ? null : { name: f.g_name.value.trim(), phone: f.g_phone.value.trim(), address: f.g_address.value.trim() };
+  rec.category = f.category.value;
+  rec.subCategory = f.subCategory.value.trim();
+  rec.severity = severityEl ? severityEl.value : '';
+  rec.description = f.description.value.trim();
+  rec.location = Object.assign({ text: f.locText.value.trim() }, ctx.gps || {});
+  rec.photos = ctx.photos.slice();
+  rec.targetDate = addDays(rec.receivedAt, projectRules(rec.projectId).resolveDays);
+  if (!rec.ref || projectChanged) { rec.ref = nextProvisionalRef(rec.projectId); rec.refProvisional = true; }
+  if (intent === 'draft') {
+    rec.sync = 'draft';
+    await saveLocal('grievances', rec);
+    toast('Draft saved on this device');
+  } else {
+    rec.history = [auditEntry({ to: 'received', note: 'Logged via ' + lbl(GRM_CHANNELS, rec.channel) })];
+    await queueLocal('grievances', rec);
+    toast(navigator.onLine ? 'Grievance ' + rec.ref + ' submitted' : 'Saved offline. ' + rec.ref + ' will sync when signal returns.');
+  }
+  state.ui.form = null;
+  location.hash = isAgent() ? '#/agent/records' : (intent === 'draft' ? '#/hq/cases' : '#/hq/case/' + encodeURIComponent(rec.lid));
+};
+
+/* =====================================================================
+   HOUSEHOLD SURVEY FORM (driven by SURVEY_FORM)
+   ===================================================================== */
+function surveyFieldHtml(fd, value) {
+  const name = 'f_' + fd.key;
+  const req = fd.required ? ' req' : '';
+  const chip = (type, v, checked) => '<label class="opt"><input type="' + type + '" name="' + name + '" value="' + esc(v) + '"' + (checked ? ' checked' : '') + '><span>' + esc(v) + '</span></label>';
+  switch (fd.type) {
+    case 'select':
+      if (fd.options.length <= 6) return '<div class="field"><span class="lbl' + req + '">' + esc(fd.label) + '</span><div class="opts">' + fd.options.map(o => chip('radio', o, value === o)).join('') + '</div></div>';
+      return '<label class="field"><span class="' + req.trim() + '">' + esc(fd.label) + '</span><select class="inp" name="' + name + '">' + optionsHtml(fd.options.map(o => [o, o]), value, 'Select') + '</select></label>';
+    case 'multi':
+      return '<div class="field"><span class="lbl' + req + '">' + esc(fd.label) + '</span><div class="opts">' + fd.options.map(o => chip('checkbox', o, Array.isArray(value) && value.includes(o))).join('') + '</div></div>';
+    case 'yesno':
+      return '<div class="field"><span class="lbl' + req + '">' + esc(fd.label) + '</span><div class="opts">' + ['Yes', 'No'].map(o => chip('radio', o, value === o)).join('') + '</div></div>';
+    case 'textarea':
+      return '<label class="field"><span class="' + req.trim() + '">' + esc(fd.label) + '</span><textarea class="inp" name="' + name + '">' + esc(value) + '</textarea></label>';
+    case 'number':
+      return '<label class="field"><span class="' + req.trim() + '">' + esc(fd.label) + '</span><input class="inp" type="number" inputmode="decimal" name="' + name + '"' + (fd.min != null ? ' min="' + fd.min + '"' : '') + (fd.max != null ? ' max="' + fd.max + '"' : '') + ' step="' + esc(fd.step || '1') + '" value="' + esc(value) + '"></label>';
+    default:
+      return '<label class="field"><span class="' + req.trim() + '">' + esc(fd.label) + '</span><input class="inp" type="' + (fd.type === 'tel' ? 'tel' : 'text') + '" name="' + name + '" autocomplete="off" value="' + esc(value) + '"></label>';
+  }
+}
+function readSurvey(form) {
+  const data = {}, bad = [];
+  for (const fd of SURVEY_FORM.fields) {
+    const name = 'f_' + fd.key;
+    let v;
+    if (fd.type === 'multi') v = Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map(x => x.value);
+    else if (fd.type === 'yesno' || (fd.type === 'select' && fd.options.length <= 6)) { const c = form.querySelector('input[name="' + name + '"]:checked'); v = c ? c.value : ''; }
+    else { const el = form.elements[name]; v = el ? el.value.trim() : ''; }
+    if (fd.type === 'number' && v !== '') {
+      const n = Number(v);
+      if (isNaN(n) || (fd.min != null && n < fd.min) || (fd.max != null && n > fd.max)) { bad.push(name); continue; }
+      v = n;
+    }
+    const empty = v === '' || (Array.isArray(v) && !v.length);
+    if (fd.required && empty) bad.push(name);
+    if (!empty) data[fd.key] = v;
+  }
+  return { data, bad };
+}
+function surveyTitle(s) { const t = SURVEY_FORM.fields.find(f => f.title); return (t && s.data && s.data[t.key]) || 'Household survey'; }
+function surveyFormHtml(rec) {
+  const r = rec || {};
+  const projects = accessibleProjects();
+  const pid = r.projectId || state.projectId || (projects[0] && projects[0].id) || '';
+  return '<form data-form="survey" novalidate data-lid="' + esc(r.lid || '') + '">' +
+    '<div class="spread" style="margin-bottom:1rem"><div><h1>' + esc(SURVEY_FORM.title) + '</h1><p class="small muted">' + (rec ? 'Editing draft · ' : '') + 'Stamped with your name, project, GPS and time</p></div><a class="btn btn-ghost btn-sm" href="#/agent/home">Cancel</a></div>' +
+    '<div id="form-err"></div>' +
+    '<div class="card"><label class="field"><span class="req">Project</span><select class="inp" name="projectId">' + optionsHtml(projects.map(p => [p.id, (p.code ? p.code + ' · ' : '') + p.name]), pid, projects.length ? undefined : 'No project available') + '</select></label>' + gpsWidget() + '</div>' +
+    '<div class="card">' + SURVEY_FORM.fields.map(fd => surveyFieldHtml(fd, (r.data || {})[fd.key])).join('') + '</div>' +
+    '<div class="card"><h3 style="margin-bottom:.6rem">Photos</h3>' + photosWidget() + '</div>' +
+    (rec ? '<p style="margin:.25rem 0 .5rem"><button type="button" class="btn btn-sm btn-danger" data-act="discard-draft" data-kind="submissions" data-lid="' + esc(rec.lid) + '">Discard draft</button></p>' : '') +
+    '<div class="form-actions"><button class="btn" type="submit" value="draft">Save draft</button><button class="btn btn-primary" type="submit" value="submit">Submit survey</button></div>' +
+    '</form>';
+}
+FORMS.survey = async (form, submitter) => {
+  const intent = submitter && submitter.value === 'draft' ? 'draft' : 'submit';
+  const u = me();
+  const ctx = formCtx();
+  const existing = form.dataset.lid ? state.submissions.find(x => x.lid === form.dataset.lid) : null;
+  if (existing && existing.sync !== 'draft') { toast('This survey is already submitted.'); return; }
+  const { data, bad } = readSurvey(form);
+  if (!form.elements.projectId.value) bad.push('projectId');
+  const blocking = intent === 'submit' ? bad : bad.filter(n => n === 'projectId');
+  if (blocking.length) {
+    markInvalid(form, blocking);
+    document.getElementById('form-err').innerHTML = '<div class="alert-box">Complete the highlighted fields.</div>';
+    return;
+  }
+  const rec = existing || { lid: uid(), createdAt: nowIso() };
+  rec.clientId = rec.lid;
+  rec.formId = SURVEY_FORM.id;
+  rec.projectId = form.elements.projectId.value;
+  rec.agent = { id: u.id, name: u.name };
+  rec.data = data;
+  rec.gps = ctx.gps;
+  rec.photos = ctx.photos.slice();
+  rec.capturedAt = nowIso();
+  if (intent === 'draft') { rec.sync = 'draft'; await saveLocal('submissions', rec); toast('Draft saved on this device'); }
+  else { await queueLocal('submissions', rec); toast(navigator.onLine ? 'Survey submitted' : 'Saved offline. Will sync when signal returns.'); }
+  state.ui.form = null;
+  location.hash = '#/agent/records';
+};
+
+/* =====================================================================
+   FIELD AGENT VIEWS
+   ===================================================================== */
+function myRecords() {
+  const u = me();
+  const g = state.grievances.filter(r => r.createdBy && r.createdBy.id === u.id).map(r => ({ kind: 'grievances', r, t: r.updatedAt }));
+  const s = state.submissions.filter(r => r.agent && r.agent.id === u.id).map(r => ({ kind: 'submissions', r, t: r.updatedAt }));
+  return g.concat(s).sort((a, b) => String(b.t).localeCompare(String(a.t)));
+}
+function recordRow(item) {
+  const r = item.r;
+  const isG = item.kind === 'grievances';
+  const p = projectById(r.projectId);
+  const title = isG ? r.ref + (r.refProvisional ? ' (provisional)' : '') : surveyTitle(r);
+  const sub = (isG ? lbl(GRM_CATEGORIES, r.category) : 'Survey') + (p ? ' · ' + (p.code || p.name) : '') + ' · ' + timeAgo(r.updatedAt);
+  return '<div class="rec" data-act="open-rec" data-kind="' + item.kind + '" data-lid="' + esc(r.lid) + '">' +
+    '<div class="rec-main"><div class="rec-title">' + esc(title) + '</div><div class="rec-sub">' + esc(sub) + '</div>' +
+    (r.sync === 'failed' ? '<div class="rec-err">' + esc(r.syncError || 'Sync failed') + '</div>' : '') + '</div>' +
+    (isG && r.sync === 'synced' ? statusBadge(r.status) : '') + syncBadge(r) +
+    (r.sync === 'failed' ? '<button class="btn btn-sm" data-act="retry" data-kind="' + item.kind + '" data-lid="' + esc(r.lid) + '">Retry</button>' : '') +
+    '</div>';
+}
+VIEWS['agent/home'] = {
+  render() {
+    const u = me();
+    const recs = myRecords();
+    const today = todayStr();
+    const c = { today: recs.filter(x => x.r.sync !== 'draft' && String(x.r.createdAt || '').slice(0, 10) === today).length, queued: 0, failed: 0, draft: 0 };
+    for (const x of recs) if (c[x.r.sync] != null) c[x.r.sync]++;
+    return '<div style="margin-bottom:.85rem"><h1>Hello, ' + esc(u.name.split(' ')[0]) + '</h1><p class="small muted">' + esc(state.lastSync ? 'Last synced ' + timeAgo(state.lastSync) : 'Not synced yet') + '</p></div>' +
+      '<div class="action-grid"><a class="action" href="#/agent/grievance">' + icon('alert') + '<b>Log grievance</b><small>GRM intake</small></a>' +
+      '<a class="action alt" href="#/agent/survey">' + icon('clipboard') + '<b>Household survey</b><small>Field data form</small></a></div>' +
+      '<div class="stat-row"><div class="stat-mini"><b>' + c.today + '</b><span>Today</span></div><div class="stat-mini"><b>' + c.queued + '</b><span>Queued</span></div><div class="stat-mini"><b>' + c.failed + '</b><span>Failed</span></div><div class="stat-mini"><b>' + c.draft + '</b><span>Drafts</span></div></div>' +
+      '<div class="card"><div class="card-h"><h2>Recent submissions</h2><a class="small" href="#/agent/records">All records</a></div>' +
+      (recs.length ? recs.slice(0, 6).map(recordRow).join('') : '<div class="empty">Nothing yet. Log a grievance or run a survey; it works without signal.</div>') + '</div>';
+  }
+};
+VIEWS['agent/grievance'] = {
+  static: true,
+  render(params) {
+    const rec = params[0] ? state.grievances.find(r => r.lid === params[0] && r.sync === 'draft') : null;
+    openGrievanceForm(rec);
+    return grievanceFormHtml(rec, '#/agent/home');
+  },
+  mount(params) { if (!params[0] && !formCtx().gps) captureGps(true); }
+};
+VIEWS['agent/survey'] = {
+  static: true,
+  render(params) {
+    const rec = params[0] ? state.submissions.find(r => r.lid === params[0] && r.sync === 'draft') : null;
+    state.ui.form = { gps: rec ? rec.gps : null, photos: rec && rec.photos ? rec.photos.slice() : [] };
+    return surveyFormHtml(rec);
+  },
+  mount(params) { if (!params[0] && !formCtx().gps) captureGps(true); }
+};
+VIEWS['agent/records'] = {
+  render() {
+    const tab = state.ui.recTab || 'all';
+    let recs = myRecords();
+    if (tab === 'grievances' || tab === 'submissions') recs = recs.filter(x => x.kind === tab);
+    else if (tab === 'pending') recs = recs.filter(x => x.r.sync !== 'synced');
+    const tabs = [['all', 'All'], ['grievances', 'Grievances'], ['submissions', 'Surveys'], ['pending', 'Not synced']];
+    return '<div class="spread" style="margin-bottom:.75rem"><h1>My records</h1><button class="btn btn-sm" data-act="sync-now">' + icon('refresh') + 'Sync now</button></div>' +
+      '<div class="tabs">' + tabs.map(([k, t]) => '<button data-act="rec-tab" data-tab="' + k + '" class="' + (tab === k ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' +
+      '<div class="card">' + (recs.length ? recs.map(recordRow).join('') : '<div class="empty">No records here.</div>') + '</div>';
+  }
+};
+ACTIONS['discard-draft'] = (el) => {
+  openModal('<h2>Discard this draft?</h2><p>The draft is deleted from this device. It was never sent to the server.</p><div class="actions"><button class="btn" data-act="modal-close">Keep</button><button class="btn btn-danger" data-act="discard-confirm" data-kind="' + esc(el.dataset.kind) + '" data-lid="' + esc(el.dataset.lid) + '">Discard</button></div>');
+};
+ACTIONS['discard-confirm'] = async (el) => { await deleteDraft(el.dataset.kind, el.dataset.lid); closeModal(); state.ui.form = null; toast('Draft discarded'); location.hash = isAgent() ? '#/agent/records' : '#/hq/cases'; };
+ACTIONS['rec-tab'] = (el) => { state.ui.recTab = el.dataset.tab; refreshView(); };
+ACTIONS.retry = (el, ev) => { ev.stopPropagation(); retryRecord(el.dataset.kind, el.dataset.lid); };
+ACTIONS['open-rec'] = (el, ev) => {
+  if (ev.target.closest('[data-act="retry"]')) return;
+  const kind = el.dataset.kind;
+  const r = state[kind].find(x => x.lid === el.dataset.lid);
+  if (!r) return;
+  if (r.sync === 'draft') { location.hash = '#/agent/' + (kind === 'grievances' ? 'grievance' : 'survey') + '/' + encodeURIComponent(r.lid); return; }
+  const p = projectById(r.projectId);
+  let dl;
+  if (kind === 'grievances') {
+    const tl = caseTimeline(r);
+    dl = [['Reference', r.ref + (r.refProvisional ? ' (provisional until synced)' : '')], ['Status', lbl(STATUSES, r.status)], ['Category', lbl(GRM_CATEGORIES, r.category)], ['Received', fmtDate(r.receivedAt)], ['Target date', fmtDate(tl.target)], ['Severity', lbl(SEVERITIES, r.severity)]];
+    if (canViewSensitive(r) && !r.anonymous && r.grievant) dl.push(['Grievant', r.grievant.name]);
+    if (r.sensitive) dl.push(['Sensitive', r.redacted ? 'Details held by the confidential handler only' : 'Yes']);
+  } else {
+    dl = [['Household', surveyTitle(r)], ['Captured', fmtDateTime(r.capturedAt)], ['GPS', r.gps ? r.gps.lat.toFixed(5) + ', ' + r.gps.lng.toFixed(5) : 'Not captured'], ['Photos', String((r.photos || []).length)]];
+  }
+  dl.push(['Project', p ? p.name : '-'], ['Sync', SYNC_LABEL[r.sync] + (r.syncError ? ': ' + r.syncError : '')]);
+  openModal('<h2>' + (kind === 'grievances' ? 'Grievance' : 'Survey') + '</h2><dl class="dl">' + dl.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>').join('') + '</dl>' +
+    '<div class="actions">' + (r.sync === 'failed' ? '<button class="btn" data-act="retry" data-kind="' + kind + '" data-lid="' + esc(r.lid) + '">Retry sync</button>' : '') + '<button class="btn btn-primary" data-act="modal-close">Close</button></div>');
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: DASHBOARD
+   ===================================================================== */
+function liveCases() { return scoped(state.grievances).filter(c => c.sync !== 'draft'); }
+function liveSubmissions() { return scoped(state.submissions).filter(s => s.sync !== 'draft'); }
+function weekStart() { const d = new Date(); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() - day); return ymd(d); }
+function barsHtml(pairs, total) {
+  const max = Math.max(1, ...pairs.map(p => p[1]));
+  if (!total) return '<div class="empty">No data yet</div>';
+  return '<div class="bars">' + pairs.map(([label, n, href]) =>
+    '<div class="bar-row"><span>' + (href ? '<a href="' + esc(href) + '">' + esc(label) + '</a>' : esc(label)) + '</span><div class="track"><div class="fill" style="width:' + (n / max * 100).toFixed(1) + '%"></div></div><b>' + n + '</b></div>').join('') + '</div>';
+}
+function projectLabel(id) { const p = projectById(id); return p ? (p.code || p.name) : '-'; }
+VIEWS['hq/dashboard'] = {
+  render() {
+    const cases = liveCases();
+    const subs = liveSubmissions();
+    const tls = new Map(cases.map(c => [c.lid, caseTimeline(c)]));
+    const open = cases.filter(c => OPEN_STATUSES.includes(c.status));
+    const overdue = cases.filter(c => tls.get(c.lid).overdue);
+    const ackOver = cases.filter(c => tls.get(c.lid).ackOverdue);
+    const closed = cases.filter(c => c.status === 'closed');
+    const ws = weekStart();
+    const subsWeek = subs.filter(s => String(s.capturedAt).slice(0, 10) >= ws);
+    const since = addDays(todayStr(), -7);
+    const agents = new Set();
+    for (const s of subs) if (String(s.capturedAt).slice(0, 10) >= since && s.agent) agents.add(s.agent.id);
+    for (const c of cases) if (String(c.createdAt || c.receivedAt).slice(0, 10) >= since && c.createdBy) agents.add(c.createdBy.id);
+    const byStatus = countBy(cases, c => c.status);
+    const byCat = countBy(cases, c => c.category);
+    const p = projectById(state.projectId);
+    const kpi = (label, n, sub, href, alert) => '<a class="kpi' + (alert && n ? ' alert' : '') + '" href="' + href + '"><span>' + label + '</span><b>' + n + '</b><small>' + sub + '</small></a>';
+    const overdueRows = overdue.sort((a, b) => tls.get(a.lid).target.localeCompare(tls.get(b.lid).target)).slice(0, 8).map(c => {
+      const tl = tls.get(c.lid);
+      return '<tr data-act="open-case" data-lid="' + esc(c.lid) + '"><td class="ref">' + esc(c.ref) + (c.sensitive ? ' ' + icon('lock') : '') + '</td><td>' + esc(lbl(GRM_CATEGORIES, c.category)) + '</td><td>' + statusBadge(c.status) + '</td><td class="nowrap">' + esc(fmtDate(tl.target)) + '</td><td><span class="badge b-bad">' + esc(tl.res.text) + '</span></td><td>' + esc(c.handlerName || 'Unassigned') + '</td></tr>';
+    }).join('');
+    return '<div class="page-h"><div><h1>Dashboard</h1><p>' + esc(p ? p.name : 'All projects') + ' · ' + esc(state.lastSync ? 'synced ' + timeAgo(state.lastSync) : 'not synced yet') + '</p></div><a class="btn btn-primary" href="#/hq/new-case">' + icon('plus') + 'Log case</a></div>' +
+      '<div class="kpis">' +
+      kpi('Open grievances', open.length, cases.length + ' total', '#/hq/cases/open') +
+      kpi('Overdue', overdue.length, 'past resolution target', '#/hq/cases/overdue', true) +
+      kpi('Awaiting acknowledgement', ackOver.length, 'beyond ' + (p ? projectRules(p.id).ackDays : GRM_CONFIG.ackDays) + '-day standard', '#/hq/cases/ack', true) +
+      kpi('Closed', closed.length, (cases.length ? Math.round(closed.length / cases.length * 100) : 0) + '% of cases', '#/hq/cases/closed') +
+      kpi('Submissions this week', subsWeek.length, subs.length + ' total', '#/hq/feed') +
+      kpi('Active field agents', agents.size, 'last 7 days', '#/hq/feed') +
+      '</div>' +
+      '<div class="cols2"><div class="card"><div class="card-h"><h2>Cases by status</h2></div>' + barsHtml(STATUSES.map(([k, t]) => [t, byStatus[k] || 0, '#/hq/cases/status-' + k]), cases.length) + '</div>' +
+      '<div class="card"><div class="card-h"><h2>Cases by category</h2></div>' + barsHtml(GRM_CATEGORIES.map(([k, t]) => [t, byCat[k] || 0]), cases.length) + '</div></div>' +
+      '<div class="card" style="margin-top:.85rem"><div class="card-h"><h2>Overdue cases</h2><a class="small" href="#/hq/cases/overdue">View all</a></div>' +
+      (overdueRows ? '<div class="table-wrap" style="box-shadow:none"><table class="t"><thead><tr><th>Ref</th><th>Category</th><th>Status</th><th>Target</th><th>Overdue</th><th>Handler</th></tr></thead><tbody>' + overdueRows + '</tbody></table></div>' : '<div class="empty">No overdue cases. Every open case is inside its resolution target.</div>') + '</div>';
+  }
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: CASE TABLE
+   ===================================================================== */
+function caseFilters() {
+  return state.ui.cf || (state.ui.cf = { q: '', status: '', category: '', project: '', agent: '', from: '', to: '', overdue: false, sort: 'receivedAt', dir: -1 });
+}
+function applyPreset(preset) {
+  const f = caseFilters();
+  if (!preset) return;
+  Object.assign(f, { status: '', overdue: false });
+  if (preset === 'open') f.status = 'open';
+  else if (preset === 'overdue') f.overdue = true;
+  else if (preset === 'ack') f.status = 'ack';
+  else if (preset === 'closed') f.status = 'closed';
+  else if (preset.startsWith('status-')) f.status = preset.slice(7);
+}
+function filteredCases() {
+  const f = caseFilters();
+  const q = f.q.trim().toLowerCase();
+  const u = me();
+  let list = scoped(state.grievances).filter(c => c.sync !== 'draft' || (c.createdBy && c.createdBy.id === u.id));
+  list = list.filter(c => {
+    const tl = caseTimeline(c);
+    if (f.status === 'open' && !tl.open) return false;
+    if (f.status === 'ack' && !tl.ackOverdue) return false;
+    if (f.status && !['open', 'ack'].includes(f.status) && c.status !== f.status) return false;
+    if (f.category && c.category !== f.category) return false;
+    if (f.project && String(c.projectId) !== f.project) return false;
+    if (f.agent && !(c.createdBy && c.createdBy.id === f.agent)) return false;
+    if (f.from && c.receivedAt < f.from) return false;
+    if (f.to && c.receivedAt > f.to) return false;
+    if (f.overdue && !tl.overdue) return false;
+    if (q) {
+      const hay = [c.ref, c.subCategory, lbl(GRM_CATEGORIES, c.category), c.handlerName];
+      if (!c.sensitive) {
+        hay.push(c.location && c.location.text, c.description);
+        if (!c.anonymous && !c.confidential && c.grievant) hay.push(c.grievant.name, c.grievant.phone);
+      }
+      if (!hay.filter(Boolean).join(' ').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  const sevRank = { low: 1, medium: 2, high: 3 };
+  const statRank = Object.fromEntries(STATUSES.map(([k], i) => [k, i]));
+  const key = {
+    ref: c => c.ref || '', receivedAt: c => c.receivedAt || '', category: c => lbl(GRM_CATEGORIES, c.category),
+    severity: c => sevRank[c.severity] || 0, status: c => statRank[c.status] || 0,
+    target: c => caseTimeline(c).target, handler: c => c.handlerName || '~', project: c => projectLabel(c.projectId)
+  }[f.sort] || (c => c.receivedAt);
+  return list.sort((a, b) => { const x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * f.dir; });
+}
+function casesBodyHtml(list) {
+  if (!list.length) return '<tr><td colspan="9"><div class="empty">No cases match these filters.</div></td></tr>';
+  return list.map(c => {
+    const tl = caseTimeline(c);
+    let due;
+    if (tl.overdue) due = '<span class="badge b-bad">Overdue · ' + esc(tl.res.text) + '</span>';
+    else if (tl.ackOverdue) due = '<span class="badge b-warn">Ack overdue</span>';
+    else if (tl.open) due = '<span class="badge ' + (tl.res.state === 'soon' ? 'b-warn' : 'b-mute') + ' plain">' + esc(tl.res.text) + '</span>';
+    else due = '<span class="badge b-ok plain">' + esc(tl.res.text) + '</span>';
+    return '<tr data-act="open-case" data-lid="' + esc(c.lid) + '">' +
+      '<td class="ref">' + esc(c.ref) + (c.refProvisional ? '<div class="small muted">provisional</div>' : '') + '</td>' +
+      '<td class="nowrap">' + esc(fmtDate(c.receivedAt)) + '</td>' +
+      '<td>' + identityCell(c) + '</td>' +
+      '<td>' + esc(lbl(GRM_CATEGORIES, c.category)) + (c.subCategory && !c.sensitive ? '<div class="small muted">' + esc(c.subCategory) + '</div>' : '') + '</td>' +
+      '<td>' + esc(lbl(SEVERITIES, c.severity)) + '</td>' +
+      '<td>' + statusBadge(c.status) + '</td>' +
+      '<td>' + esc(c.handlerName || '-') + '</td>' +
+      '<td class="nowrap">' + esc(fmtDate(tl.target)) + '<div>' + due + '</div></td>' +
+      '<td>' + syncBadge(c) + '</td></tr>';
+  }).join('');
+}
+function refreshCasesTable() {
+  const list = filteredCases();
+  const body = document.getElementById('cases-body');
+  if (body) body.innerHTML = casesBodyHtml(list);
+  const n = document.getElementById('cases-count');
+  if (n) n.textContent = list.length + ' case' + (list.length === 1 ? '' : 's');
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const f = caseFilters();
+    th.querySelector('.arr').textContent = th.dataset.sort === f.sort ? (f.dir > 0 ? ' ▲' : ' ▼') : '';
+  });
+}
+VIEWS['hq/cases'] = {
+  render(params) {
+    if (params[0] && state.ui.cfPreset !== location.hash) { applyPreset(params[0]); state.ui.cfPreset = location.hash; }
+    if (!params[0]) state.ui.cfPreset = '';
+    const f = caseFilters();
+    const statusOpts = [['open', 'All open'], ['ack', 'Awaiting acknowledgement (overdue)']].concat(STATUSES);
+    const projects = accessibleProjects().map(p => [p.id, (p.code ? p.code + ' · ' : '') + p.name]);
+    const agents = knownPeople().filter(x => state.grievances.some(g => g.createdBy && g.createdBy.id === x.id)).map(x => [x.id, x.name]);
+    const th = (k, t) => '<th data-sort="' + k + '" data-act="sort">' + t + '<span class="arr"></span></th>';
+    return '<div class="page-h"><div><h1>Grievance cases</h1><p id="cases-count"></p></div><a class="btn btn-primary" href="#/hq/new-case">' + icon('plus') + 'Log case</a></div>' +
+      '<div class="filters"><input class="inp search" type="search" placeholder="Search ref, sub-category, location, name" data-filter="q" value="' + esc(f.q) + '">' +
+      '<select class="inp" data-filter="status">' + optionsHtml(statusOpts, f.status, 'Any status') + '</select>' +
+      '<select class="inp" data-filter="category">' + optionsHtml(GRM_CATEGORIES, f.category, 'Any category') + '</select>' +
+      '<select class="inp" data-filter="project">' + optionsHtml(projects, f.project, 'Any project') + '</select>' +
+      '<select class="inp" data-filter="agent">' + optionsHtml(agents, f.agent, 'Any agent') + '</select></div>' +
+      '<div class="filters2"><label class="row small"><span class="muted nowrap">From</span><input class="inp" type="date" data-filter="from" value="' + esc(f.from) + '"></label>' +
+      '<label class="row small"><span class="muted nowrap">To</span><input class="inp" type="date" data-filter="to" value="' + esc(f.to) + '"></label>' +
+      '<label class="check" style="margin:0"><input type="checkbox" data-filter="overdue"' + (f.overdue ? ' checked' : '') + '><div><b>Overdue only</b></div></label>' +
+      '<button class="btn btn-sm btn-ghost" data-act="clear-filters">Clear filters</button></div>' +
+      '<div class="table-wrap"><table class="t"><thead><tr>' + th('ref', 'Ref') + th('receivedAt', 'Received') + '<th>Grievant</th>' + th('category', 'Category') + th('severity', 'Severity') + th('status', 'Status') + th('handler', 'Handler') + th('target', 'Target') + '<th>Sync</th></tr></thead>' +
+      '<tbody id="cases-body"></tbody></table></div>';
+  },
+  mount() { refreshCasesTable(); }
+};
+function onFilter(el) {
+  const f = caseFilters();
+  const k = el.dataset.filter;
+  f[k] = el.type === 'checkbox' ? el.checked : el.value;
+  refreshCasesTable();
+}
+document.addEventListener('input', (ev) => { const el = ev.target.closest('[data-filter]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') onFilter(el); });
+document.addEventListener('change', (ev) => { const el = ev.target.closest('[data-filter]'); if (el) onFilter(el); });
+ACTIONS.sort = (el) => { const f = caseFilters(); if (f.sort === el.dataset.sort) f.dir = -f.dir; else { f.sort = el.dataset.sort; f.dir = 1; } refreshCasesTable(); };
+ACTIONS['clear-filters'] = () => { state.ui.cf = null; if (location.hash === '#/hq/cases') refreshView(); else location.hash = '#/hq/cases'; };
+ACTIONS['open-case'] = (el) => {
+  const c = state.grievances.find(x => x.lid === el.dataset.lid);
+  if (!c) return;
+  location.hash = c.sync === 'draft' ? '#/hq/new-case/' + encodeURIComponent(c.lid) : '#/hq/case/' + encodeURIComponent(c.lid);
+};
+VIEWS['hq/new-case'] = {
+  static: true,
+  render(params) {
+    const rec = params[0] ? state.grievances.find(r => r.lid === params[0] && r.sync === 'draft') : null;
+    openGrievanceForm(rec);
+    return '<div style="max-width:760px">' + grievanceFormHtml(rec, '#/hq/cases') + '</div>';
+  }
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: CASE DETAIL + LIFECYCLE
+   ===================================================================== */
+function stepperHtml(c) {
+  const appealed = c.status === 'appealed' || (c.history || []).some(h => h.to === 'appealed');
+  const steps = ['received', 'acknowledged', 'under_investigation', 'resolved'].concat(appealed ? ['appealed'] : []).concat(['closed']);
+  const order = { received: 0, acknowledged: 1, under_investigation: 2, resolved: 3, appealed: 4, closed: 5 };
+  const cur = c.status;
+  return '<div class="stepper">' + steps.map(s => {
+    let cls = '';
+    if (s === cur) cls = cur === 'closed' ? 'done' : 'cur';
+    else if (s === 'appealed' && appealed) cls = 'branch';
+    else if (cur === 'appealed') cls = order[s] <= 3 ? 'done' : '';
+    else if (order[s] < order[cur]) cls = 'done';
+    return '<div class="step ' + cls + '">' + esc(lbl(STATUSES, s)) + '</div>';
+  }).join('') + '</div>';
+}
+function timelineHtml(c) {
+  const tl = caseTimeline(c);
+  const r = projectRules(c.projectId);
+  return '<div class="tl">' +
+    '<div class="tl-item ' + tl.ack.state + '"><span>Acknowledgement · ' + r.ackDays + '-day standard</span><b>' + esc(tl.ack.text) + '</b><small class="muted">Due ' + esc(fmtDate(tl.ackDue)) + (c.acknowledgedAt ? ' · done ' + esc(fmtDate(c.acknowledgedAt)) : '') + '</small></div>' +
+    '<div class="tl-item ' + tl.res.state + '"><span>Resolution target · ' + r.resolveDays + '-day standard</span><b>' + esc(tl.res.text) + '</b><small class="muted">Target ' + esc(fmtDate(tl.target)) + (c.resolutionDate ? ' · resolved ' + esc(fmtDate(c.resolutionDate)) : '') + '</small></div>' +
+    '</div>';
+}
+const TRANSITION_LABEL = { acknowledged: 'Acknowledge', under_investigation: 'Start investigation', resolved: 'Record resolution', closed: 'Close case', appealed: 'Grievant appeals' };
+function caseActionsHtml(c, canView) {
+  const assign = '<form data-form="assign" data-lid="' + esc(c.lid) + '" style="margin-top:.75rem">' +
+    '<label class="field"><span>' + (c.sensitive ? 'Confidential handler' : 'Assigned handler') + '</span><input class="inp" name="handler" list="people" placeholder="Name" value="' + esc(c.handlerName) + '"></label>' +
+    '<datalist id="people">' + knownPeople().map(p => '<option value="' + esc(p.name) + '">').join('') + '</datalist>' +
+    '<label class="field"><span>Agreed resolution target</span><input class="inp" type="date" name="targetDate" value="' + esc(caseTimeline(c).target) + '"' + (canView ? '' : ' disabled') + '></label>' +
+    '<div class="row"><button class="btn btn-sm" type="submit">Save assignment</button><button class="btn btn-sm btn-ghost" type="button" data-act="assign-me" data-lid="' + esc(c.lid) + '">Assign to me</button></div></form>';
+  const next = allowedTransitions(c);
+  const buttons = canView && next.length
+    ? next.map(to => '<button class="btn ' + (to === 'appealed' ? 'btn-danger' : 'btn-primary') + '" style="width:100%;margin-bottom:.5rem" data-act="transition" data-to="' + to + '" data-lid="' + esc(c.lid) + '">' + esc(TRANSITION_LABEL[to]) + '</button>').join('')
+    : (canView ? '<p class="small muted">This case is closed. The record is kept for audit.</p>' : '');
+  const lock = !canView ? '<div class="lock" style="margin-bottom:.5rem">' + icon('lock') + '<div><b>Restricted case</b><p class="small">Only the confidential handler' + (c.handlerName ? ' (' + esc(c.handlerName) + ')' : '') + ' can view details and move this case. You can still assign the handler.</p></div></div>' : '';
+  const warn = c.sensitive && !c.handlerId ? '<div class="alert-box warn">Sensitive case without a confidential handler. Assign one now.</div>' : '';
+  return '<div class="card"><h2 style="margin-bottom:.75rem">Actions</h2>' + lock + warn + buttons + (c.status === 'closed' ? '<p class="small">Handler: <b>' + esc(c.handlerName || '-') + '</b></p>' : assign) + '</div>';
+}
+function detailsHtml(c) {
+  const g = c.grievant || {};
+  const loc = c.location || {};
+  const p = projectById(c.projectId);
+  let grievant;
+  if (c.anonymous) grievant = '<span class="muted">Anonymous</span>';
+  else grievant = esc(g.name || '-') + (g.phone ? '<br><span class="small">' + esc(g.phone) + '</span>' : '') + (g.address ? '<br><span class="small muted">' + esc(g.address) + '</span>' : '') + (c.confidential ? '<br><span class="badge b-vio plain">Confidential</span>' : '');
+  const gps = loc.lat != null ? '<br><a class="small mono" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + loc.lat + '&mlon=' + loc.lng + '#map=17/' + loc.lat + '/' + loc.lng + '">' + Number(loc.lat).toFixed(5) + ', ' + Number(loc.lng).toFixed(5) + '</a>' : '';
+  const rows = [
+    ['Date received', esc(fmtDate(c.receivedAt))], ['Channel', esc(lbl(GRM_CHANNELS, c.channel))], ['Project', esc(p ? p.name : '-')],
+    ['Grievant', grievant], ['Category', esc(lbl(GRM_CATEGORIES, c.category))], ['Sub-category', esc(c.subCategory || '-')],
+    ['Severity', esc(lbl(SEVERITIES, c.severity))], ['Location', esc(loc.text || '-') + gps], ['Logged by', esc((c.createdBy && c.createdBy.name) || '-') + ' · ' + esc(fmtDateTime(c.createdAt))]
+  ];
+  const photos = (c.photos || []).length ? '<div class="photos" style="margin-top:.75rem">' + c.photos.map((ph, i) => '<a class="photo" href="' + esc(ph.dataUrl || ph.url || '') + '" target="_blank" rel="noopener"><img src="' + esc(ph.dataUrl || ph.url || '') + '" alt="Evidence ' + (i + 1) + '"></a>').join('') + '</div>' : '';
+  return '<div class="card"><h2 style="margin-bottom:.75rem">Grievance</h2><dl class="dl">' + rows.map(([k, v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('') + '</dl>' +
+    '<h3 style="margin:1rem 0 .35rem">Description</h3><p style="white-space:pre-wrap">' + esc(c.description || '-') + '</p>' + photos + '</div>';
+}
+function outcomeHtml(c) {
+  const fb = { satisfied: 'Satisfied', not_satisfied: 'Not satisfied', not_obtained: 'Not obtained' };
+  const rows = [];
+  if (c.resolution) rows.push(['Resolution / response', esc(c.resolution).replace(/\n/g, '<br>')], ['Resolution date', esc(fmtDate(c.resolutionDate))]);
+  if (c.feedback) rows.push(['Grievant feedback', esc(fb[c.feedback] || c.feedback)]);
+  if (c.appeal) rows.push(['Appeal', esc(c.appealNotes || 'Yes') + (c.appealedAt ? '<br><span class="small muted">' + esc(fmtDate(c.appealedAt)) + '</span>' : '')]);
+  for (const pr of (c.previousResolutions || [])) rows.push(['Earlier resolution', esc(pr.resolution) + '<br><span class="small muted">' + esc(fmtDate(pr.resolutionDate)) + ', rejected on appeal</span>']);
+  if (c.closedAt) rows.push(['Closure date', esc(fmtDate(c.closedAt))], ['Closure reason', esc(c.closureReason || '-')]);
+  if (!rows.length) return '';
+  return '<div class="card"><h2 style="margin-bottom:.75rem">Resolution and closure</h2><dl class="dl">' + rows.map(([k, v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('') + '</dl></div>';
+}
+function notesHtml(c) {
+  const notes = (c.notes || []).slice().reverse();
+  return '<div class="card"><div class="card-h"><h2>Investigation notes</h2><span class="small muted">Append-only</span></div>' +
+    (c.status !== 'closed' ? '<form data-form="note" data-lid="' + esc(c.lid) + '"><label class="field"><textarea class="inp" name="text" placeholder="Site visit findings, meetings held, evidence reviewed" style="min-height:72px"></textarea></label><button class="btn btn-sm" type="submit">Add note</button></form>' : '') +
+    (notes.length ? '<ul class="log" style="margin-top:.5rem">' + notes.map(n => '<li><div class="meta">' + esc(n.by) + ' · ' + esc(fmtDateTime(n.at)) + '</div><div style="white-space:pre-wrap">' + esc(n.text) + '</div></li>').join('') + '</ul>' : '<p class="small muted" style="margin-top:.5rem">No notes yet.</p>') + '</div>';
+}
+function historyHtml(c) {
+  const h = (c.history || []).slice().reverse();
+  return '<div class="card"><h2 style="margin-bottom:.5rem">Audit trail</h2>' + (h.length ? '<ul class="log">' + h.map(e => '<li><div class="meta">' + esc(fmtDateTime(e.at)) + ' · ' + esc(e.by || '') + '</div>' +
+    (e.to ? (e.from ? esc(lbl(STATUSES, e.from)) + ' → ' : '') + '<b>' + esc(lbl(STATUSES, e.to)) + '</b>' : '<b>Updated</b>') + (e.note ? '<div class="small">' + esc(e.note) + '</div>' : '') + '</li>').join('') + '</ul>' : '<p class="small muted">No entries.</p>') + '</div>';
+}
+VIEWS['hq/case'] = {
+  render(params) {
+    const c = state.grievances.find(x => x.lid === params[0]);
+    if (!c) return '<div class="empty">Case not found on this device. <a href="#/hq/cases">Back to cases</a></div>';
+    const canView = canViewSensitive(c);
+    const head = '<div class="page-h"><div><a class="small" href="#/hq/cases">' + 'Back to cases</a><h1 style="margin-top:.25rem">' + esc(c.ref) + (c.refProvisional ? ' <span class="small muted">(provisional)</span>' : '') + '</h1>' +
+      '<div class="row wrap" style="margin-top:.35rem">' + statusBadge(c.status) + '<span class="badge plain">' + esc(lbl(SEVERITIES, c.severity)) + ' severity</span>' +
+      (c.sensitive ? '<span class="badge b-vio">' + 'Sensitive</span>' : '') + (caseTimeline(c).overdue ? '<span class="badge b-bad">Overdue</span>' : '') + syncBadge(c) +
+      (c.sync === 'failed' ? '<button class="btn btn-sm" data-act="retry" data-kind="grievances" data-lid="' + esc(c.lid) + '">Retry sync</button><span class="small" style="color:var(--bad)">' + esc(c.syncError) + '</span>' : '') + '</div></div></div>';
+    const left = canView
+      ? detailsHtml(c) + outcomeHtml(c) + notesHtml(c)
+      : '<div class="card"><div class="lock">' + icon('lock') + '<div><b>Details restricted</b><p class="small">Grievant identity, description, location, evidence and notes are visible only to the confidential handler.</p><dl class="dl" style="margin-top:.6rem"><dt>Category</dt><dd>' + esc(lbl(GRM_CATEGORIES, c.category)) + '</dd><dt>Received</dt><dd>' + esc(fmtDate(c.receivedAt)) + '</dd><dt>Project</dt><dd>' + esc(projectLabel(c.projectId)) + '</dd></dl></div></div></div>';
+    return head + '<div class="card">' + stepperHtml(c) + timelineHtml(c) + '</div>' +
+      '<div class="cols-detail" style="margin-top:.85rem"><div>' + left + '</div><div>' + caseActionsHtml(c, canView) + (canView ? historyHtml(c) : '') + '</div></div>';
+  }
+};
+function findCase(lid) { return state.grievances.find(x => x.lid === lid); }
+function resolveHandler(name) {
+  const n = String(name || '').trim();
+  if (!n) return { handlerId: '', handlerName: '' };
+  const hit = knownPeople().find(p => p.name.toLowerCase() === n.toLowerCase());
+  return { handlerId: hit ? hit.id : '', handlerName: hit ? hit.name : n };
+}
+FORMS.assign = async (form) => {
+  const c = findCase(form.dataset.lid);
+  if (!c) return;
+  const h = resolveHandler(form.handler.value);
+  const changes = {}, notes = [];
+  if (h.handlerName !== (c.handlerName || '')) { Object.assign(changes, h); notes.push(h.handlerName ? 'Assigned to ' + h.handlerName : 'Handler removed'); }
+  const t = form.targetDate.value;
+  if (!form.targetDate.disabled && t && t !== caseTimeline(c).target) {
+    if (t < c.receivedAt) { toast('Target date cannot be before the date received.'); return; }
+    changes.targetDate = t; notes.push('Resolution target set to ' + fmtDate(t));
+  }
+  if (!notes.length) { toast('No changes'); return; }
+  await updateCase(c, changes, notes.join('; '));
+  toast('Saved');
+  refreshView();
+};
+ACTIONS['assign-me'] = (el) => {
+  const form = el.closest('form');
+  form.handler.value = me().name;
+  form.requestSubmit ? form.requestSubmit() : FORMS.assign(form);
+};
+FORMS.note = async (form) => {
+  const c = findCase(form.dataset.lid);
+  const text = form.text.value.trim();
+  if (!c || !text) return;
+  await appendNote(c, text);
+  toast('Note added');
+  refreshView();
+};
+ACTIONS.transition = (el) => {
+  const c = findCase(el.dataset.lid);
+  const to = el.dataset.to;
+  if (!c || !allowedTransitions(c).includes(to)) return;
+  const tl = caseTimeline(c);
+  const today = todayStr();
+  let fields = '';
+  if (to === 'acknowledged') fields =
+    '<label class="field"><span class="req">Acknowledgement date</span><input class="inp" type="date" name="ackDate" value="' + today + '" min="' + esc(c.receivedAt) + '" max="' + today + '"></label>' +
+    '<label class="field"><span class="req">Agreed resolution target</span><input class="inp" type="date" name="targetDate" value="' + esc(tl.target) + '" min="' + esc(c.receivedAt) + '"></label>';
+  else if (to === 'under_investigation') fields =
+    '<label class="field"><span class="' + (c.handlerName ? '' : 'req') + '">Handler</span><input class="inp" name="handler" list="people" value="' + esc(c.handlerName || me().name) + '"></label>';
+  else if (to === 'resolved') fields =
+    '<label class="field"><span class="req">Resolution / response to grievant</span><textarea class="inp" name="resolution">' + esc(c.resolution) + '</textarea></label>' +
+    '<label class="field"><span class="req">Resolution date</span><input class="inp" type="date" name="resolutionDate" value="' + today + '" min="' + esc(c.receivedAt) + '" max="' + today + '"></label>';
+  else if (to === 'closed') fields =
+    '<label class="field"><span class="req">Grievant feedback on the resolution</span><select class="inp" name="feedback">' + optionsHtml([['satisfied', 'Satisfied'], ['not_satisfied', 'Not satisfied'], ['not_obtained', 'Could not be obtained']], c.feedback, 'Select') + '</select></label>' +
+    '<p class="small muted" style="margin:-.4rem 0 .8rem">If the grievant is not satisfied and wants the case reviewed, use "Grievant appeals" instead.</p>' +
+    '<label class="field"><span class="req">Closure reason</span><input class="inp" name="closureReason" placeholder="e.g. Compensation paid, grievant satisfied"></label>' +
+    '<label class="field"><span class="req">Closure date</span><input class="inp" type="date" name="closedAt" value="' + today + '" min="' + esc(c.resolutionDate || c.receivedAt) + '" max="' + today + '"></label>';
+  else if (to === 'appealed') fields =
+    '<p class="small" style="margin-bottom:.75rem">Records that the grievant rejected the outcome. The case returns to investigation and the current resolution is kept in the record.</p>' +
+    '<label class="field"><span class="req">Appeal notes</span><textarea class="inp" name="appealNotes" placeholder="Why the grievant rejects the outcome, what they are asking for"></textarea></label>';
+  openModal('<form data-form="transition" data-lid="' + esc(c.lid) + '" data-to="' + to + '" novalidate><h2>' + esc(TRANSITION_LABEL[to]) + '</h2>' +
+    '<p class="small muted" style="margin-bottom:.85rem">' + esc(c.ref) + ' · ' + esc(lbl(STATUSES, c.status)) + ' → ' + esc(lbl(STATUSES, to)) + '</p>' + fields +
+    '<label class="field"><span>Note for the audit trail</span><input class="inp" name="note"></label><div id="tr-err"></div>' +
+    '<datalist id="people">' + knownPeople().map(p => '<option value="' + esc(p.name) + '">').join('') + '</datalist>' +
+    '<div class="actions"><button type="button" class="btn" data-act="modal-close">Cancel</button><button class="btn btn-primary" type="submit">Confirm</button></div></form>');
+};
+FORMS.transition = async (form) => {
+  const c = findCase(form.dataset.lid);
+  const to = form.dataset.to;
+  if (!c) return;
+  const f = form.elements;
+  const v = n => (f[n] ? f[n].value.trim() : '');
+  const bad = [];
+  const fields = {};
+  const today = todayStr();
+  if (to === 'acknowledged') {
+    if (!v('ackDate') || v('ackDate') < c.receivedAt || v('ackDate') > today) bad.push('ackDate');
+    if (!v('targetDate') || v('targetDate') < c.receivedAt) bad.push('targetDate');
+    Object.assign(fields, { acknowledgedAt: v('ackDate'), targetDate: v('targetDate') });
+  } else if (to === 'under_investigation') {
+    const h = resolveHandler(v('handler') || c.handlerName);
+    if (!h.handlerName) bad.push('handler');
+    Object.assign(fields, h);
+  } else if (to === 'resolved') {
+    if (v('resolution').length < 3) bad.push('resolution');
+    if (!v('resolutionDate') || v('resolutionDate') < c.receivedAt || v('resolutionDate') > today) bad.push('resolutionDate');
+    Object.assign(fields, { resolution: v('resolution'), resolutionDate: v('resolutionDate') });
+  } else if (to === 'closed') {
+    if (!v('feedback')) bad.push('feedback');
+    if (!v('closureReason')) bad.push('closureReason');
+    if (!v('closedAt') || v('closedAt') < (c.resolutionDate || c.receivedAt) || v('closedAt') > today) bad.push('closedAt');
+    Object.assign(fields, { feedback: v('feedback'), closureReason: v('closureReason'), closedAt: v('closedAt') });
+  } else if (to === 'appealed') {
+    if (v('appealNotes').length < 3) bad.push('appealNotes');
+    Object.assign(fields, {
+      appeal: true, appealNotes: v('appealNotes'), appealedAt: today, feedback: 'not_satisfied',
+      previousResolutions: (c.previousResolutions || []).concat(c.resolution ? [{ resolution: c.resolution, resolutionDate: c.resolutionDate }] : []),
+      resolution: '', resolutionDate: ''
+    });
+  }
+  if (bad.length) { markInvalid(form, bad); document.getElementById('tr-err').innerHTML = '<div class="alert-box">Complete the highlighted fields.</div>'; return; }
+  try { await transitionCase(c, to, fields, v('note')); }
+  catch (e) { document.getElementById('tr-err').innerHTML = '<div class="alert-box">' + esc(e.message) + '</div>'; return; }
+  closeModal();
+  toast(c.ref + ' · ' + lbl(STATUSES, to));
+  refreshView();
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: FIELD-DATA FEED
+   ===================================================================== */
+async function pollFeed() {
+  if (!navigator.onLine || state.syncing || parseRoute().name !== 'hq/feed') return;
+  try {
+    const s = await api('GET', '/submissions');
+    await mergeServer('submissions', pickList(s, ['items', 'data', 'submissions']));
+    if (parseRoute().name === 'hq/feed') refreshView(true);
+  } catch (_) { /* next poll retries */ }
+}
+function fieldValueText(fd, v) { return Array.isArray(v) ? v.join(', ') : String(v); }
+VIEWS['hq/feed'] = {
+  render() {
+    if (state.ui.feedPrevSeen === undefined) state.ui.feedPrevSeen = state.feedSeenAt || '';
+    const agentF = state.ui.feedAgent || '';
+    let subs = liveSubmissions().sort((a, b) => String(b.capturedAt).localeCompare(String(a.capturedAt)));
+    const agents = Array.from(new Map(subs.filter(s => s.agent).map(s => [s.agent.id, s.agent.name])));
+    if (agentF) subs = subs.filter(s => s.agent && s.agent.id === agentF);
+    const prev = state.ui.feedPrevSeen;
+    const open = state.ui.feedOpen || '';
+    const items = subs.slice(0, 200).map(s => {
+      const isNew = prev && String(s.updatedAt || s.capturedAt) > prev;
+      const p = projectById(s.projectId);
+      const d = s.data || {};
+      const highlights = SURVEY_FORM.fields.filter(f => f.tally && d[f.key] != null).slice(0, 4).map(f => '<span class="badge plain">' + esc(fieldValueText(f, d[f.key])) + '</span>').join(' ');
+      const detail = open === s.lid ? '<div class="kv">' + SURVEY_FORM.fields.filter(f => d[f.key] != null && d[f.key] !== '').map(f => '<div><span>' + esc(f.label) + '</span>' + esc(fieldValueText(f, d[f.key])) + '</div>').join('') +
+        '<div><span>GPS</span>' + (s.gps ? '<a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + s.gps.lat + '&mlon=' + s.gps.lng + '">' + s.gps.lat.toFixed(5) + ', ' + s.gps.lng.toFixed(5) + '</a>' : 'Not captured') + '</div>' +
+        '<div><span>Photos</span>' + (s.photos || []).length + '</div></div>' : '';
+      return '<div class="feed-item' + (isNew ? ' new' : '') + '" data-act="feed-toggle" data-lid="' + esc(s.lid) + '"><div class="feed-avatar">' + esc(initials(s.agent && s.agent.name)) + '</div><div class="grow" style="min-width:0">' +
+        '<div class="spread"><b>' + esc(surveyTitle(s)) + '</b><span class="small muted nowrap">' + esc(fmtDateTime(s.capturedAt)) + '</span></div>' +
+        '<div class="small muted">' + esc((s.agent && s.agent.name) || '-') + ' · ' + esc(p ? (p.code || p.name) : '-') + (s.gps ? ' · GPS' : '') + (isNew ? ' · <b style="color:var(--brand)">New</b>' : '') + '</div>' +
+        '<div class="row wrap" style="margin-top:.35rem">' + highlights + (s.sync !== 'synced' ? syncBadge(s) : '') + '</div>' + detail + '</div></div>';
+    }).join('');
+    return '<div class="page-h"><div><h1>Field data</h1><p>' + subs.length + ' submissions · refreshes every ' + GRM_CONFIG.feedPollSeconds + ' s while online</p></div>' +
+      '<div class="row"><select class="inp" data-change="feed-agent" style="min-height:38px">' + optionsHtml(agents, agentF, 'All agents') + '</select><button class="btn" data-act="sync-now">' + icon('refresh') + 'Refresh</button></div></div>' +
+      '<div class="card" style="padding:0">' + (items || '<div class="empty">No field submissions yet for this scope.</div>') + '</div>';
+  },
+  mount() {
+    clearInterval(timers.feed);
+    timers.feed = setInterval(pollFeed, GRM_CONFIG.feedPollSeconds * 1000);
+    state.feedSeenAt = nowIso();
+    dbPut('meta', state.feedSeenAt, 'feedSeenAt');
+  }
+};
+ACTIONS['feed-toggle'] = (el, ev) => { if (ev.target.closest('a')) return; state.ui.feedOpen = state.ui.feedOpen === el.dataset.lid ? '' : el.dataset.lid; refreshView(); };
+CHANGES['feed-agent'] = (el) => { state.ui.feedAgent = el.value; refreshView(); };
+
+/* =====================================================================
+   SUPERVISOR / HQ: PROJECTS
+   ===================================================================== */
+VIEWS['hq/projects'] = {
+  render() {
+    const list = accessibleProjects();
+    const cards = list.map(p => {
+      const cases = state.grievances.filter(g => String(g.projectId) === String(p.id) && g.sync !== 'draft');
+      const openN = cases.filter(g => OPEN_STATUSES.includes(g.status)).length;
+      const subsN = state.submissions.filter(s => String(s.projectId) === String(p.id) && s.sync !== 'draft').length;
+      const r = projectRules(p.id);
+      const cur = String(state.projectId) === String(p.id);
+      return '<div class="card"><div class="spread"><div><h2>' + esc(p.name) + '</h2><p class="small muted">' + esc(p.code || 'No code') + ' · acknowledge in ' + r.ackDays + ' d · resolve in ' + r.resolveDays + ' d</p></div>' +
+        (cur ? '<span class="badge b-brand">Current</span>' : '<button class="btn btn-sm" data-act="use-project" data-id="' + esc(p.id) + '">Switch to</button>') + '</div>' +
+        (p.description ? '<p class="small" style="margin-top:.4rem">' + esc(p.description) + '</p>' : '') +
+        '<div class="row wrap small" style="margin-top:.6rem;gap:1rem"><span><b>' + cases.length + '</b> cases</span><span><b>' + openN + '</b> open</span><span><b>' + subsN + '</b> submissions</span></div></div>';
+    }).join('');
+    return '<div class="page-h"><div><h1>Projects</h1><p>Records are scoped to the project selected at the top.</p></div></div>' +
+      '<div class="cols-detail"><div>' + (cards || '<div class="card"><div class="empty">No projects yet. Create the first one.</div></div>') + '</div>' +
+      '<div><form class="card" data-form="project" novalidate><h2 style="margin-bottom:.75rem">New project</h2>' +
+      '<label class="field"><span class="req">Project name</span><input class="inp" name="name" placeholder="e.g. Msimbazi Basin RAP"></label>' +
+      '<label class="field"><span class="req">Case code</span><input class="inp" name="code" maxlength="6" placeholder="MSB" style="text-transform:uppercase"></label>' +
+      '<div class="grid2"><label class="field"><span>Acknowledge within (days)</span><input class="inp" type="number" name="ackDays" min="1" max="60" value="' + GRM_CONFIG.ackDays + '"></label>' +
+      '<label class="field"><span>Resolve within (days)</span><input class="inp" type="number" name="resolveDays" min="1" max="365" value="' + GRM_CONFIG.resolveDays + '"></label></div>' +
+      '<label class="field"><span>Description</span><textarea class="inp" name="description" style="min-height:64px"></textarea></label>' +
+      '<div id="proj-err"></div><button class="btn btn-primary" type="submit"' + (state.online ? '' : ' disabled') + '>Create project</button>' +
+      (state.online ? '' : '<p class="small muted" style="margin-top:.5rem">Creating a project needs a connection.</p>') + '</form></div></div>';
+  }
+};
+ACTIONS['use-project'] = async (el) => { state.projectId = el.dataset.id; await dbPut('meta', state.projectId, 'projectId'); refreshView(); toast('Switched project'); };
+FORMS.project = async (form) => {
+  const f = form.elements;
+  const name = f.name.value.trim();
+  const code = f.code.value.trim().toUpperCase();
+  const bad = [];
+  if (!name) bad.push('name');
+  if (!/^[A-Z0-9]{2,6}$/.test(code) || state.projects.some(p => (p.code || '').toUpperCase() === code)) bad.push('code');
+  const ackDays = Number(f.ackDays.value), resolveDays = Number(f.resolveDays.value);
+  if (!(ackDays >= 1)) bad.push('ackDays');
+  if (!(resolveDays >= ackDays)) bad.push('resolveDays');
+  const err = document.getElementById('proj-err');
+  if (bad.length) { markInvalid(form, bad); err.innerHTML = '<div class="alert-box">Check the highlighted fields. Codes are 2 to 6 letters or digits and must be unique; resolution days cannot be shorter than acknowledgement days.</div>'; return; }
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try {
+    const res = await api('POST', '/projects', { name, code, ackDays, resolveDays, description: f.description.value.trim() });
+    const p = normalizeProject(Object.assign({ name, code, ackDays, resolveDays }, (res && (res.item || res.project || res)) || {}));
+    await dbPut('projects', p);
+    state.projects.push(p);
+    state.projectId = p.id;
+    await dbPut('meta', p.id, 'projectId');
+    toast('Project ' + p.name + ' created');
+    refreshView();
+  } catch (e) {
+    btn.disabled = false;
+    err.innerHTML = '<div class="alert-box">' + esc(e.network ? 'No connection. Try again when online.' : e.message) + '</div>';
+  }
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: TEAM INVITES
+   ===================================================================== */
+VIEWS['hq/team'] = {
+  render() {
+    const projects = accessibleProjects();
+    const inv = state.invites.slice().reverse();
+    return '<div class="page-h"><div><h1>Team</h1><p>Invite field agents and supervisors by email.</p></div></div>' +
+      '<div class="cols-detail"><div class="card"><h2 style="margin-bottom:.75rem">Invitations sent</h2>' +
+      (inv.length ? '<div class="table-wrap" style="box-shadow:none"><table class="t"><thead><tr><th>Email</th><th>Role</th><th>Projects</th><th>Sent</th></tr></thead><tbody>' +
+        inv.map(i => '<tr><td>' + esc(i.email) + '</td><td>' + esc(i.role === 'field_agent' ? 'Field agent' : 'Supervisor') + '</td><td>' + esc((i.projectIds || []).map(projectLabel).join(', ') || 'All') + '</td><td class="nowrap">' + esc(fmtDateTime(i.sentAt)) + '</td></tr>').join('') + '</tbody></table></div>'
+        : '<div class="empty">No invitations sent from this device yet.</div>') + '</div>' +
+      '<form class="card" data-form="invite" novalidate><h2 style="margin-bottom:.75rem">Invite a user</h2>' +
+      '<label class="field"><span class="req">Email</span><input class="inp" type="email" name="email" placeholder="name@organisation.org"></label>' +
+      '<div class="field"><span class="lbl req">Role</span><div class="opts"><label class="opt"><input type="radio" name="role" value="field_agent" checked><span>Field agent</span></label><label class="opt"><input type="radio" name="role" value="supervisor"><span>Supervisor / HQ</span></label></div></div>' +
+      '<div class="field"><span class="lbl">Project access</span>' + (projects.length ? projects.map(p => '<label class="check"><input type="checkbox" name="projectIds" value="' + esc(p.id) + '"' + (String(state.projectId) === String(p.id) ? ' checked' : '') + '><div><b>' + esc(p.name) + '</b><small>' + esc(p.code) + '</small></div></label>').join('') : '<p class="small muted">No projects yet.</p>') + '</div>' +
+      '<div id="inv-err"></div><button class="btn btn-primary" type="submit"' + (state.online ? '' : ' disabled') + '>Send invitation</button>' +
+      (state.online ? '' : '<p class="small muted" style="margin-top:.5rem">Sending invitations needs a connection.</p>') + '</form></div>';
+  }
+};
+FORMS.invite = async (form) => {
+  const email = form.email.value.trim();
+  const role = (form.querySelector('input[name=role]:checked') || {}).value || 'field_agent';
+  const projectIds = Array.from(form.querySelectorAll('input[name=projectIds]:checked')).map(x => x.value);
+  const err = document.getElementById('inv-err');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { markInvalid(form, ['email']); err.innerHTML = '<div class="alert-box">Enter a valid email address.</div>'; return; }
+  if (role === 'field_agent' && !projectIds.length) { err.innerHTML = '<div class="alert-box">Give the field agent access to at least one project.</div>'; return; }
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try {
+    await api('POST', '/invites', { email, role, projectIds });
+    state.invites.push({ email, role, projectIds, sentAt: nowIso() });
+    await dbPut('meta', state.invites, 'invites');
+    toast('Invitation sent to ' + email);
+    refreshView();
+  } catch (e) {
+    btn.disabled = false;
+    err.innerHTML = '<div class="alert-box">' + esc(e.network ? 'No connection. Try again when online.' : e.message) + '</div>';
+  }
+};
+
+/* =====================================================================
+   SUPERVISOR / HQ: REPORT BUILDER
+   Reports never contain grievant identities. Sensitive cases are counted,
+   but their category, handler and any detail are withheld.
+   ===================================================================== */
+function quarterStart() { const d = new Date(); return ymd(new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3, 1)); }
+function reportCfg() {
+  return state.ui.report || (state.ui.report = { type: 'both', project: state.projectId || '', from: quarterStart(), to: todayStr(), built: false });
+}
+function pct(n, d) { return d ? Math.round(n / d * 100) + '%' : '-'; }
+function rTable(head, rows, numericFrom) {
+  const nf = numericFrom == null ? 1 : numericFrom;
+  return '<table><thead><tr>' + head.map((h, i) => '<th' + (i >= nf ? ' class="n"' : '') + '>' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' +
+    (rows.length ? rows.map(r => '<tr>' + r.map((c, i) => '<td' + (i >= nf ? ' class="n"' : '') + '>' + esc(c) + '</td>').join('') + '</tr>').join('') : '<tr><td colspan="' + head.length + '">No records in this period.</td></tr>') + '</tbody></table>';
+}
+function reportScope(list, cfg) {
+  const allowed = me().projects;
+  return list.filter(r => r.sync !== 'draft' && (cfg.project ? String(r.projectId) === String(cfg.project) : (!allowed.length || allowed.includes(String(r.projectId)))));
+}
+function reportHeader(title, cfg) {
+  const p = projectById(cfg.project);
+  return '<h1>' + esc(title) + '</h1><div class="rmeta">' + esc(p ? p.name + (p.code ? ' (' + p.code + ')' : '') : 'All projects') + ' · Period ' + esc(fmtDate(cfg.from)) + ' to ' + esc(fmtDate(cfg.to)) +
+    '<br>Generated ' + esc(fmtDateTime(nowIso())) + ' by ' + esc(me().name) + ' · Data as of ' + esc(state.lastSync ? fmtDateTime(state.lastSync) : 'last local save') + '</div>';
+}
+function grmReportHtml(cfg) {
+  const all = reportScope(state.grievances, cfg);
+  const cases = all.filter(c => c.receivedAt >= cfg.from && c.receivedAt <= cfg.to);
+  const tls = new Map(cases.map(c => [c.lid, caseTimeline(c)]));
+  const total = cases.length;
+  const openN = cases.filter(c => OPEN_STATUSES.includes(c.status)).length;
+  const closed = cases.filter(c => c.status === 'closed');
+  const resolvedOrClosed = cases.filter(c => c.status === 'resolved' || c.status === 'closed').length;
+  const overdue = cases.filter(c => tls.get(c.lid).overdue);
+  const closeDays = closed.filter(c => c.closedAt).map(c => diffDays(c.receivedAt, c.closedAt));
+  const avgClose = closeDays.length ? (closeDays.reduce((a, b) => a + b, 0) / closeDays.length).toFixed(1) : '-';
+  const acked = cases.filter(c => c.acknowledgedAt);
+  const ackOnTime = acked.filter(c => tls.get(c.lid).ack.state === 'met').length;
+  const sensitiveN = cases.filter(c => c.sensitive).length;
+  const byStatus = countBy(cases, c => c.status);
+  const byCat = countBy(cases.filter(c => !c.sensitive), c => c.category);
+  const bySev = countBy(cases, c => c.severity);
+  const projIds = Array.from(new Set(cases.map(c => String(c.projectId))));
+  const projRows = projIds.map(id => {
+    const pc = cases.filter(c => String(c.projectId) === id);
+    return [projectById(id) ? projectById(id).name : id, pc.length, pc.filter(c => OPEN_STATUSES.includes(c.status)).length, pc.filter(c => c.status === 'closed').length, pc.filter(c => tls.get(c.lid).overdue).length];
+  });
+  const overdueRows = overdue.sort((a, b) => tls.get(a.lid).target.localeCompare(tls.get(b.lid).target)).map(c => {
+    const tl = tls.get(c.lid);
+    return c.sensitive
+      ? [c.ref, projectLabel(c.projectId), 'Sensitive case (restricted)', fmtDate(c.receivedAt), fmtDate(tl.target), -diffDays(todayStr(), tl.target), '-', lbl(STATUSES, c.status)]
+      : [c.ref, projectLabel(c.projectId), lbl(GRM_CATEGORIES, c.category), fmtDate(c.receivedAt), fmtDate(tl.target), -diffDays(todayStr(), tl.target), c.handlerName || 'Unassigned', lbl(STATUSES, c.status)];
+  });
+  const catRows = GRM_CATEGORIES.map(([k, t]) => [t, byCat[k] || 0, pct(byCat[k] || 0, total)]);
+  if (sensitiveN) catRows.push(['Sensitive cases (category withheld)', sensitiveN, pct(sensitiveN, total)]);
+  return '<div class="report">' + reportHeader('GRM status report', cfg) +
+    '<div class="summary"><div><span>Grievances received</span><b>' + total + '</b></div><div><span>Open</span><b>' + openN + '</b></div><div><span>Closed</span><b>' + closed.length + '</b></div><div><span>Overdue (open, past target)</span><b>' + overdue.length + '</b></div>' +
+    '<div><span>Resolution rate</span><b>' + pct(resolvedOrClosed, total) + '</b></div><div><span>Average days to close</span><b>' + avgClose + '</b></div><div><span>Acknowledged within standard</span><b>' + pct(ackOnTime, acked.length) + '</b></div><div><span>Appeals lodged</span><b>' + cases.filter(c => c.appeal).length + '</b></div></div>' +
+    '<h2>Cases by status</h2>' + rTable(['Status', 'Cases', 'Share'], STATUSES.map(([k, t]) => [t, byStatus[k] || 0, pct(byStatus[k] || 0, total)])) +
+    '<h2>Cases by category</h2>' + rTable(['Category', 'Cases', 'Share'], catRows) +
+    '<h2>Cases by severity</h2>' + rTable(['Severity', 'Cases', 'Share'], SEVERITIES.map(([k, t]) => [t, bySev[k] || 0, pct(bySev[k] || 0, total)])) +
+    '<h2>Cases by project</h2>' + rTable(['Project', 'Cases', 'Open', 'Closed', 'Overdue'], projRows) +
+    '<h2>Overdue cases</h2>' + rTable(['Ref', 'Project', 'Category', 'Received', 'Target', 'Days overdue', 'Handler', 'Status'], overdueRows, 5) +
+    '<p class="note">Resolution rate = cases resolved or closed ÷ cases received in the period. Average days to close is measured from receipt to closure. Grievant identities are never included in this report; sensitive cases are counted but their details are withheld.</p></div>';
+}
+function fieldReportHtml(cfg) {
+  const subs = reportScope(state.submissions, cfg).filter(s => { const d = String(s.capturedAt).slice(0, 10); return d >= cfg.from && d <= cfg.to; });
+  const total = subs.length;
+  const projIds = Array.from(new Set(subs.map(s => String(s.projectId))));
+  const agentMap = new Map();
+  for (const s of subs) {
+    const id = (s.agent && s.agent.id) || '?';
+    const a = agentMap.get(id) || { name: (s.agent && s.agent.name) || 'Unknown', n: 0, last: '' , gps: 0 };
+    a.n++; if (String(s.capturedAt) > a.last) a.last = String(s.capturedAt); if (s.gps) a.gps++;
+    agentMap.set(id, a);
+  }
+  const sumFields = SURVEY_FORM.fields.filter(f => f.sum);
+  const sums = sumFields.map(f => {
+    const vals = subs.map(s => Number((s.data || {})[f.key])).filter(v => !isNaN(v));
+    const t = vals.reduce((a, b) => a + b, 0);
+    return [f.label, Math.round(t * 100) / 100, vals.length ? (t / vals.length).toFixed(1) : '-', vals.length];
+  });
+  const tallies = SURVEY_FORM.fields.filter(f => f.tally).map(f => {
+    const counts = {};
+    for (const s of subs) {
+      const v = (s.data || {})[f.key];
+      const vals = Array.isArray(v) ? v : (v == null || v === '' ? [] : [v]);
+      for (const x of vals) counts[x] = (counts[x] || 0) + 1;
+    }
+    const opts = f.options || (f.type === 'yesno' ? ['Yes', 'No'] : Object.keys(counts).sort());
+    const rows = opts.map(o => [o, counts[o] || 0, pct(counts[o] || 0, total)]);
+    return '<h2>' + esc(f.label) + (f.type === 'multi' ? ' <span style="font-weight:400;font-size:.8rem">(multiple answers)</span>' : '') + '</h2>' + rTable(['Answer', 'Households', 'Share'], rows);
+  }).join('');
+  return '<div class="report">' + reportHeader('Field-data summary', cfg) +
+    '<div class="summary"><div><span>Submissions</span><b>' + total + '</b></div><div><span>Field agents</span><b>' + agentMap.size + '</b></div><div><span>Projects</span><b>' + projIds.length + '</b></div><div><span>With GPS</span><b>' + pct(subs.filter(s => s.gps).length, total) + '</b></div></div>' +
+    '<h2>Submissions by project</h2>' + rTable(['Project', 'Submissions', 'Share'], projIds.map(id => { const n = subs.filter(s => String(s.projectId) === id).length; return [projectById(id) ? projectById(id).name : id, n, pct(n, total)]; })) +
+    '<h2>Submissions by agent</h2>' + rTable(['Agent', 'Submissions', 'With GPS', 'Last submission'], Array.from(agentMap.values()).sort((a, b) => b.n - a.n).map(a => [a.name, a.n, a.gps, fmtDateTime(a.last)])) +
+    (sums.length ? '<h2>Household totals</h2>' + rTable(['Measure', 'Total', 'Average per household', 'Households reporting'], sums) : '') +
+    tallies +
+    '<p class="note">Survey: ' + esc(SURVEY_FORM.title) + ' (' + esc(SURVEY_FORM.id) + '). Household names and phone numbers are excluded from this summary.</p></div>';
+}
+VIEWS['hq/reports'] = {
+  render() {
+    const cfg = reportCfg();
+    const projects = accessibleProjects().map(p => [p.id, (p.code ? p.code + ' · ' : '') + p.name]);
+    const presets = [['month', 'This month'], ['quarter', 'This quarter'], ['ytd', 'Year to date'], ['all', 'All time']];
+    let out = '<div class="page-h no-print"><div><h1>Reports</h1><p>Build a report, then print or save it as PDF.</p></div>' + (cfg.built ? '<button class="btn btn-primary" data-act="print">' + icon('print') + 'Print / Save as PDF</button>' : '') + '</div>' +
+      '<form class="card no-print" data-form="report" novalidate><div class="grid3">' +
+      '<label class="field"><span>Report</span><select class="inp" name="type">' + optionsHtml([['both', 'GRM status + field-data summary'], ['grm', 'GRM status report'], ['field', 'Field-data summary']], cfg.type) + '</select></label>' +
+      '<label class="field"><span>Project</span><select class="inp" name="project">' + optionsHtml(projects, cfg.project, 'All projects') + '</select></label>' +
+      '<div class="grid2"><label class="field"><span>From</span><input class="inp" type="date" name="from" value="' + esc(cfg.from) + '"></label><label class="field"><span>To</span><input class="inp" type="date" name="to" value="' + esc(cfg.to) + '"></label></div></div>' +
+      '<div class="spread"><div class="row wrap">' + presets.map(([k, t]) => '<button type="button" class="btn btn-sm btn-ghost" data-act="period" data-p="' + k + '">' + t + '</button>').join('') + '</div><button class="btn btn-primary" type="submit">Build report</button></div></form>';
+    if (cfg.built) {
+      out += '<div class="print-area">' +
+        (cfg.type !== 'field' ? grmReportHtml(cfg) : '') +
+        (cfg.type === 'both' ? '<div class="report-split"></div>' : '') +
+        (cfg.type !== 'grm' ? fieldReportHtml(cfg) : '') + '</div>';
+    }
+    return out;
+  }
+};
+FORMS.report = (form) => {
+  const f = form.elements;
+  const from = f.from.value || '2000-01-01', to = f.to.value || todayStr();
+  if (from > to) { toast('The start date is after the end date.'); return; }
+  state.ui.report = { type: f.type.value, project: f.project.value, from, to, built: true };
+  refreshView();
+};
+ACTIONS.period = (el) => {
+  const form = el.closest('form');
+  const t = todayStr();
+  const d = new Date();
+  const from = { month: ymd(new Date(d.getFullYear(), d.getMonth(), 1)), quarter: quarterStart(), ytd: ymd(new Date(d.getFullYear(), 0, 1)), all: '2000-01-01' }[el.dataset.p];
+  form.elements.from.value = from;
+  form.elements.to.value = t;
+};
+ACTIONS.print = () => window.print();
+
+/* =====================================================================
+   LAYOUT + ROUTER
+   ===================================================================== */
+function parseRoute() {
+  const raw = (location.hash || '').replace(/^#\/?/, '');
+  const parts = raw.split('/').filter(Boolean).map(decodeURIComponent);
+  return { name: parts.slice(0, 2).join('/'), params: parts.slice(2) };
+}
+function defaultRoute() { return isAgent() ? '#/agent/home' : '#/hq/dashboard'; }
+function startApp() {
+  const r = parseRoute();
+  const prefix = isAgent() ? 'agent/' : 'hq/';
+  if (!r.name.startsWith(prefix) || !VIEWS[r.name]) location.hash = defaultRoute();
+  else render();
+  startTimers();
+}
+function render() {
+  if (!state.session) { renderLogin(); return; }
+  const r = parseRoute();
+  const prefix = isAgent() ? 'agent/' : 'hq/';
+  if (!r.name.startsWith(prefix) || !VIEWS[r.name]) { location.hash = defaultRoute(); return; }
+  const view = VIEWS[r.name];
+  clearInterval(timers.feed); timers.feed = null;
+  if (r.name !== 'hq/feed') state.ui.feedPrevSeen = undefined;
+  const body = view.render(r.params);
+  document.getElementById('app').innerHTML = isAgent() ? agentShell(r.name, body) : hqShell(r.name, body);
+  if (view.mount) view.mount(r.params);
+  window.scrollTo(0, 0);
+}
+/** Re-render the current view in place without scrolling (used after background changes). */
+function refreshView(background) {
+  if (!state.session) return;
+  const active = document.activeElement;
+  // Background refreshes (sync, feed polling) never wipe a form the user is typing in.
+  if (background && active && active.closest && active.closest('form[data-form]')) { renderSyncPill(); return; }
+  const y = window.scrollY;
+  const r = parseRoute();
+  const view = VIEWS[r.name];
+  if (!view || view.static) { renderSyncPill(); return; }
+  const body = view.render(r.params);
+  document.getElementById('app').innerHTML = isAgent() ? agentShell(r.name, body) : hqShell(r.name, body);
+  if (view.mount) view.mount(r.params);
+  window.scrollTo(0, y);
+}
+
+function syncPillHtml() {
+  const pend = pendingCount();
+  const failed = state.grievances.concat(state.submissions).filter(r => r.sync === 'failed').length;
+  let cls = '', text;
+  if (!state.online) { cls = 'off'; text = pend ? 'Offline · ' + pend + ' queued' : 'Offline'; }
+  else if (state.syncing) { cls = 'pend busy'; text = 'Syncing…'; }
+  else if (failed) { cls = 'fail'; text = failed + ' failed · retry'; }
+  else if (pend) { cls = 'pend'; text = pend + ' queued · sync'; }
+  else { text = 'All synced'; }
+  return '<button class="sync-pill ' + cls + '" data-act="sync-now" id="sync-pill" title="' + esc(state.lastSync ? 'Last sync ' + fmtDateTime(state.lastSync) : 'Not synced yet') + '"><span class="dot"></span>' + esc(text) + '</button>';
+}
+function renderSyncPill() {
+  const el = document.getElementById('sync-pill');
+  if (el) el.outerHTML = syncPillHtml();
+  const ob = document.getElementById('offline-bar');
+  if (ob) ob.classList.toggle('hidden', state.online);
+}
+function accessibleProjects() {
+  const u = me();
+  if (!u) return [];
+  if (!u.projects.length) return state.projects;
+  return state.projects.filter(p => u.projects.includes(String(p.id)));
+}
+function projectById(id) { return state.projects.find(p => String(p.id) === String(id)) || null; }
+function projectSelectHtml(allowAll) {
+  const list = accessibleProjects();
+  if (!list.length) return '<div class="proj-name">No project yet</div>';
+  let opts = allowAll ? '<option value="">All projects</option>' : '';
+  for (const p of list) opts += '<option value="' + esc(p.id) + '"' + (String(state.projectId) === String(p.id) ? ' selected' : '') + '>' + esc((p.code ? p.code + ' · ' : '') + p.name) + '</option>';
+  return '<select class="inp" data-change="project" aria-label="Current project">' + opts + '</select>';
+}
+function agentShell(name, body) {
+  const nav = [['agent/home', 'home', 'Home'], ['agent/grievance', 'alert', 'Grievance'], ['agent/survey', 'clipboard', 'Survey'], ['agent/records', 'list', 'Records']];
+  return '<div id="offline-bar" class="offline-bar' + (state.online ? ' hidden' : '') + '">Offline. Everything you save is stored on this phone and syncs when signal returns.</div>' +
+    '<header class="topbar"><div class="proj">' + projectSelectHtml(false) + '</div>' + syncPillHtml() + '</header>' +
+    '<main class="agent-main">' + body + '</main>' +
+    '<nav class="bottom-nav">' + nav.map(n => '<a href="#/' + n[0] + '" class="' + (name.startsWith(n[0]) ? 'on' : '') + '">' + icon(n[1]) + n[2] + '</a>').join('') + '</nav>';
+}
+function hqShell(name, body) {
+  const nav = [['hq/dashboard', 'grid', 'Dashboard'], ['hq/cases', 'alert', 'Cases'], ['hq/feed', 'inbox', 'Field data'], ['hq/reports', 'report', 'Reports'], ['hq/projects', 'folder', 'Projects'], ['hq/team', 'users', 'Team']];
+  const isOn = n => name === n || (n === 'hq/cases' && (name === 'hq/case' || name === 'hq/new-case'));
+  const u = me();
+  return '<div class="hq"><aside class="side"><div class="brand"><div class="brand-mark">' + icon('logo') + '</div><div><b>FlowDesk</b><small>GRM + field data</small></div></div>' +
+    nav.map(n => '<a href="#/' + n[0] + '" class="' + (isOn(n[0]) ? 'on' : '') + '">' + icon(n[1]) + n[2] + '</a>').join('') +
+    '<div class="who"><b>' + esc(u.name) + '</b>' + esc(u.email) + '<br><button data-act="logout">Sign out</button></div></aside>' +
+    '<div class="hq-body"><div id="offline-bar" class="offline-bar' + (state.online ? ' hidden' : '') + '">Offline. Changes are saved on this device and sync when the connection returns.</div>' +
+    '<header class="topbar"><div class="proj row">' + projectSelectHtml(true) + '</div>' + syncPillHtml() + '</header>' +
+    '<nav class="mob-nav">' + nav.map(n => '<a href="#/' + n[0] + '" class="' + (isOn(n[0]) ? 'on' : '') + '">' + n[2] + '</a>').join('') + '<a href="#" data-act="logout">Sign out</a></nav>' +
+    '<main class="hq-main">' + body + '</main></div></div>';
+}
+
+/* =====================================================================
+   MODAL
+   ===================================================================== */
+function openModal(html) {
+  document.getElementById('modal-root').innerHTML = '<div class="modal-bg" data-act="modal-bg"><div class="modal" role="dialog" aria-modal="true">' + html + '</div></div>';
+  const first = document.querySelector('#modal-root input, #modal-root select, #modal-root textarea');
+  if (first) first.focus();
+}
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
+
+/* =====================================================================
+   EVENT DELEGATION
+   ===================================================================== */
+Object.assign(ACTIONS, {
+  'modal-close': () => closeModal(),
+  'modal-bg': (el, ev) => { if (ev.target === el) closeModal(); },
+  'logout': () => logout(false),
+  'logout-force': () => { expiredShown = false; logout(true); },
+  'sync-now': () => { closeModal(); syncNow(true); }
+});
+Object.assign(FORMS, {
+  login: async (form) => {
+    const btn = form.querySelector('button[type=submit]');
+    const errBox = document.getElementById('login-err');
+    const email = form.email.value.trim();
+    const password = form.password.value;
+    if (!email || !password) { errBox.innerHTML = '<div class="alert-box">Enter your email and password.</div>'; return; }
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try { await login(email, password); }
+    catch (e) {
+      errBox.innerHTML = '<div class="alert-box">' + esc(e.network ? 'No connection. Sign in requires network the first time.' : e.message) + '</div>';
+      btn.disabled = false; btn.textContent = 'Sign in';
+    }
+  }
+});
+CHANGES.project = async (el) => {
+  state.projectId = el.value;
+  await dbPut('meta', state.projectId, 'projectId');
+  refreshView();
+};
+document.addEventListener('click', (ev) => {
+  const el = ev.target.closest('[data-act]');
+  if (!el) return;
+  const fn = ACTIONS[el.dataset.act];
+  if (!fn) return;
+  if (el.tagName === 'A') ev.preventDefault();
+  fn(el, ev);
+});
+document.addEventListener('submit', (ev) => {
+  const form = ev.target.closest('form[data-form]');
+  if (!form) return;
+  ev.preventDefault();
+  const fn = FORMS[form.dataset.form];
+  if (fn) fn(form, ev.submitter || null);
+});
+document.addEventListener('change', (ev) => {
+  const el = ev.target.closest('[data-change]');
+  if (!el) return;
+  const fn = CHANGES[el.dataset.change];
+  if (fn) fn(el, ev);
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && document.querySelector('#modal-root .modal')) closeModal(); });
+window.addEventListener('hashchange', () => { closeModal(); render(); });
+window.addEventListener('online', () => { state.online = true; renderSyncPill(); syncNow(false); });
+window.addEventListener('offline', () => { state.online = false; renderSyncPill(); });
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+function startTimers() {
+  stopTimers();
+  if (typeof syncTick === 'function') timers.sync = setInterval(syncTick, GRM_CONFIG.autoSyncSeconds * 1000);
+}
+function stopTimers() { clearInterval(timers.sync); clearInterval(timers.feed); timers.sync = null; timers.feed = null; }
+
+async function loadLocal() {
+  const [g, s, p, pid, last, inv, seen] = await Promise.all([
+    dbGetAll('grievances'), dbGetAll('submissions'), dbGetAll('projects'),
+    dbGet('meta', 'projectId'), dbGet('meta', 'lastSync'), dbGet('meta', 'invites'), dbGet('meta', 'feedSeenAt')
+  ]);
+  state.grievances = g || [];
+  state.submissions = s || [];
+  state.projects = p || [];
+  state.lastSync = last || null;
+  state.invites = inv || [];
+  state.feedSeenAt = seen || null;
+  state.projectId = pid != null ? pid : '';
+  ensureProjectSelection();
+}
+function ensureProjectSelection() {
+  const list = accessibleProjects();
+  const valid = list.some(p => String(p.id) === String(state.projectId));
+  if (isAgent()) { if (!valid) state.projectId = list.length ? String(list[0].id) : ''; }
+  else if (state.projectId && !valid) state.projectId = '';
+}
+async function boot() {
+  try { db = await openDB(); }
+  catch (_) { document.getElementById('app').innerHTML = '<div class="splash">This browser blocked local storage, which FlowDesk needs to work offline. Leave private browsing and reload.</div>'; return; }
+  const session = await dbGet('meta', 'session');
+  if (session && session.token && session.user) {
+    state.session = session;
+    await loadLocal();
+    startApp();
+    syncNow(false);
+  } else {
+    renderLogin();
+  }
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+boot();
+</script>
+</body>
+</html>

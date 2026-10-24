@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "FlowDesk GRM",
+  "short_name": "FlowDesk",
+  "description": "Grievance redress and field data collection for resettlement and land acquisition projects. Works offline.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f5f4",
+  "theme_color": "#0f5c57",
+  "lang": "en",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
